@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* EcoGest - Sistema de Gestão Ambiental
+   Design System: Professional environmental theme with forest greens and earth tones
+*/
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 140 20% 98%;
+    --foreground: 150 25% 12%;
+
+    /* Cards and surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 150 25% 12%;
+
+    /* Popovers */
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 25% 12%;
+
+    /* Primary - Deep forest green */
+    --primary: 152 45% 28%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Light sage */
+    --secondary: 145 25% 94%;
+    --secondary-foreground: 150 25% 20%;
+
+    /* Muted - Soft gray-green */
+    --muted: 140 15% 93%;
+    --muted-foreground: 150 10% 45%;
+
+    /* Accent - Teal */
+    --accent: 174 60% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Status colors */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --expired: 0 72% 51%;
+    --expired-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 145 20% 88%;
+    --input: 145 20% 88%;
+    --ring: 152 45% 28%;
+
+    --radius: 0.625rem;
+
+    /* Sidebar */
+    --sidebar-background: 152 45% 22%;
+    --sidebar-foreground: 140 20% 95%;
+    --sidebar-primary: 174 60% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 152 35% 30%;
+    --sidebar-accent-foreground: 140 20% 95%;
+    --sidebar-border: 152 30% 28%;
+    --sidebar-ring: 174 60% 50%;
+
+    /* Custom gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(152 45% 28%), hsl(152 45% 22%));
+    --gradient-accent: linear-gradient(135deg, hsl(174 60% 40%), hsl(152 45% 28%));
+    --gradient-hero: linear-gradient(135deg, hsl(152 45% 25%), hsl(174 55% 35%));
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(150 25% 12% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(150 25% 12% / 0.08), 0 2px 4px -2px hsl(150 25% 12% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(150 25% 12% / 0.1), 0 4px 6px -4px hsl(150 25% 12% / 0.05);
+    --shadow-card: 0 1px 3px 0 hsl(150 25% 12% / 0.08), 0 1px 2px -1px hsl(150 25% 12% / 0.08);
+  }
+
+  .dark {
+    --background: 150 25% 8%;
+    --foreground: 140 20% 95%;
+
+    --card: 150 20% 12%;
+    --card-foreground: 140 20% 95%;
+
+    --popover: 150 20% 12%;
+    --popover-foreground: 140 20% 95%;
+
+    --primary: 152 50% 45%;
+    --primary-foreground: 150 25% 8%;
+
+    --secondary: 150 15% 18%;
+    --secondary-foreground: 140 20% 90%;
+
+    --muted: 150 15% 18%;
+    --muted-foreground: 140 10% 60%;
+
+    --accent: 174 55% 45%;
+    --accent-foreground: 150 25% 8%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 80% 50%;
+    --warning-foreground: 0 0% 100%;
+    --expired: 0 62% 45%;
+    --expired-foreground: 0 0% 100%;
+
+    --border: 150 15% 22%;
+    --input: 150 15% 22%;
+    --ring: 152 50% 45%;
+
+    --sidebar-background: 150 25% 8%;
+    --sidebar-foreground: 140 20% 90%;
+    --sidebar-primary: 174 55% 50%;
+    --sidebar-primary-foreground: 150 25% 8%;
+    --sidebar-accent: 150 15% 15%;
+    --sidebar-accent-foreground: 140 20% 90%;
+    --sidebar-border: 150 15% 18%;
+    --sidebar-ring: 174 55% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  .glass-effect {
+    @apply bg-card/80 backdrop-blur-sm;
+  }
+
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
