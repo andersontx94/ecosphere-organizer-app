@@ -1,24 +1,50 @@
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
-const NotFound = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
-
+export default function NotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-muted-foreground">Oops! Page not found</p>
-        <a href="/" className="text-primary underline hover:text-primary/90">
-          Return to Home
-        </a>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f5f6f8",
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          padding: 40,
+          borderRadius: 8,
+          textAlign: "center",
+          boxShadow: "0 0 12px rgba(0,0,0,0.08)",
+          maxWidth: 420,
+        }}
+      >
+        <h1 style={{ fontSize: 48, marginBottom: 8 }}>404</h1>
+
+        <h2 style={{ marginBottom: 12 }}>
+          Página não encontrada
+        </h2>
+
+        <p style={{ color: "#555", marginBottom: 24 }}>
+          A página que você tentou acessar não existe ou foi removida.
+        </p>
+
+        <Link
+          to="/dashboard"
+          style={{
+            textDecoration: "none",
+            background: "#00ffff",
+            color: "#000",
+            padding: "10px 18px",
+            borderRadius: 6,
+            fontWeight: "bold",
+          }}
+        >
+          Voltar para o Dashboard
+        </Link>
       </div>
     </div>
   );
-};
-
-export default NotFound;
+}
