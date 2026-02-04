@@ -9,6 +9,7 @@ export default function NewProcess() {
   const [enterprises, setEnterprises] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
 
+  const [processNumber, setProcessNumber] = useState("");
   const [clientId, setClientId] = useState("");
   const [enterpriseId, setEnterpriseId] = useState("");
   const [serviceId, setServiceId] = useState("");
@@ -34,6 +35,7 @@ export default function NewProcess() {
 
   async function loadEnterprises(clientId: string) {
     setEnterpriseId("");
+
     const { data } = await supabase
       .from("enterprises")
       .select("*")
@@ -48,8 +50,15 @@ export default function NewProcess() {
     setLoading(true);
 
     try {
-      if (!clientId || !enterpriseId || !serviceId) {
-        setError("Cliente, empresa e serviço são obrigatórios.");
+      if (
+        !processNumber.trim() ||
+        !clientId ||
+        !enterpriseId ||
+        !serviceId
+      ) {
+        setError(
+          "Número do processo, cliente, empresa e serviço são obrigatórios."
+        );
         return;
       }
 
@@ -59,6 +68,7 @@ export default function NewProcess() {
 
       const { error } = await supabase.from("processes").insert([
         {
+          process_number: processNumber.trim(),
           client_id: clientId,
           enterprise_id: enterpriseId,
           service_id: serviceId,
@@ -84,6 +94,16 @@ export default function NewProcess() {
       <h1 className="text-2xl font-semibold mb-6">Novo Processo</h1>
 
       <div className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
+
+        {/* Número do Processo */}
+        <input
+          className="w-full border rounded-lg px-3 py-2"
+          placeholder="Número do Processo"
+          value={processNumber}
+          onChange={(e) => setProcessNumber(e.target.value)}
+        />
+
+        {/* Cliente */}
         <select
           className="w-full border rounded-lg px-3 py-2"
           value={clientId}
@@ -93,6 +113,7 @@ export default function NewProcess() {
           }}
         >
           <option value="">Selecione um cliente</option>
+
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -100,12 +121,14 @@ export default function NewProcess() {
           ))}
         </select>
 
+        {/* Empresa */}
         <select
           className="w-full border rounded-lg px-3 py-2"
           value={enterpriseId}
           onChange={(e) => setEnterpriseId(e.target.value)}
         >
           <option value="">Selecione uma empresa</option>
+
           {enterprises.map((e) => (
             <option key={e.id} value={e.id}>
               {e.name}
@@ -113,12 +136,14 @@ export default function NewProcess() {
           ))}
         </select>
 
+        {/* Serviço */}
         <select
           className="w-full border rounded-lg px-3 py-2"
           value={serviceId}
           onChange={(e) => setServiceId(e.target.value)}
         >
           <option value="">Selecione o serviço</option>
+
           {services.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -126,6 +151,7 @@ export default function NewProcess() {
           ))}
         </select>
 
+        {/* Órgão */}
         <input
           className="w-full border rounded-lg px-3 py-2"
           placeholder="Órgão / Agência"
@@ -133,6 +159,7 @@ export default function NewProcess() {
           onChange={(e) => setAgency(e.target.value)}
         />
 
+        {/* Data */}
         <input
           type="date"
           className="w-full border rounded-lg px-3 py-2"
@@ -140,7 +167,9 @@ export default function NewProcess() {
           onChange={(e) => setDueDate(e.target.value)}
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
 
         <button
           onClick={handleSave}
@@ -149,6 +178,7 @@ export default function NewProcess() {
         >
           {loading ? "Salvando..." : "Salvar Processo"}
         </button>
+
       </div>
     </div>
   );
