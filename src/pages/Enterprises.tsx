@@ -1,73 +1,103 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+
+type Enterprise = {
+  id: string;
+  name: string;
+  client_id: string;
+  created_at: string;
+};
 
 export default function Enterprises() {
-  const enterprises = [
-    {
-      client: "Construtora Alfa",
-      name: "Residencial Jardim Verde",
-      activity: "Construção Civil",
-      city: "Manaus / AM",
-      status: "Licença Ativa",
-    },
-    {
-      client: "Solar Norte Energia",
-      name: "Usina Solar Manaus",
-      activity: "Geração de Energia",
-      city: "Iranduba / AM",
-      status: "Em Renovação",
-    },
-  ];
+  const navigate = useNavigate();
+
+  const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEnterprises();
+  }, []);
+
+  async function fetchEnterprises() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("enterprises")
+      .select("id, name, client_id, created_at")
+      .order("name");
+
+    if (!error) {
+      setEnterprises(data || []);
+    }
+
+    setLoading(false);
+  }
+
+  if (loading) {
+    return <p className="p-6 text-gray-500">Carregando empresas...</p>;
+  }
 
   return (
-    <div>
-      <h1 style={{ marginBottom: 8 }}>
-        Empreendimentos 🌱
-      </h1>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold">Empresas</h1>
 
-      <p style={{ color: "#555", marginBottom: 24 }}>
-        Gestão de clientes e empreendimentos da consultoria ambiental
-      </p>
+        <button
+          onClick={() => navigate("/empresas/nova")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
+        >
+          + Nova Empresa
+        </button>
+      </div>
 
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#fff",
-        }}
-      >
-        <thead>
-          <tr>
-            <th style={th}>Cliente</th>
-            <th style={th}>Empreendimento</th>
-            <th style={th}>Atividade</th>
-            <th style={th}>Município</th>
-            <th style={th}>Status Ambiental</th>
-          </tr>
-        </thead>
+      {enterprises.length === 0 ? (
+        <p className="text-gray-500 text-sm">
+          Nenhuma empresa cadastrada.
+        </p>
+      ) : (
+        <div className="bg-white border rounded-lg overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-600">
+              <tr>
+                <th className="text-left px-4 py-3">Empresa</th>
+                <th className="text-left px-4 py-3">Criada em</th>
+                <th className="text-right px-4 py-3">Ação</th>
+              </tr>
+            </thead>
 
-        <tbody>
-          {enterprises.map((e, index) => (
-            <tr key={index}>
-              <td style={td}>{e.client}</td>
-              <td style={td}>{e.name}</td>
-              <td style={td}>{e.activity}</td>
-              <td style={td}>{e.city}</td>
-              <td style={td}>{e.status}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            <tbody>
+              {enterprises.map((enterprise) => (
+                <tr
+                  key={enterprise.id}
+                  className="border-t hover:bg-gray-50"
+                >
+                  <td className="px-4 py-3 font-medium">
+                    {enterprise.name}
+                  </td>
+
+                  <td className="px-4 py-3 text-gray-500">
+                    {new Date(
+                      enterprise.created_at
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() =>
+                        navigate(`/empresas/${enterprise.id}`)
+                      }
+                      className="text-blue-600 hover:underline"
+                    >
+                      Detalhes →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
-
-const th: React.CSSProperties = {
-  textAlign: "left",
-  padding: 12,
-  borderBottom: "1px solid #ddd",
-};
-
-const td: React.CSSProperties = {
-  padding: 12,
-  borderBottom: "1px solid #eee",
-};

@@ -1,42 +1,50 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ToastProvider } from "./components/Toast";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Layout
+/* Layout */
 import DashboardLayout from "./components/layout/DashboardLayout";
 
-// Páginas - Processos
-import Processes from "./pages/Processes";
-import ProcessDetail from "./pages/ProcessDetail";
-import NewProcess from "./pages/NewProcess";
-
-// Páginas - Clientes
+/* Pages */
+import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
+import ClientDetail from "./pages/ClientDetail";
 import NewClient from "./pages/NewClient";
+
+import Enterprises from "./pages/Enterprises";
+import NewEnterprise from "./pages/NewEnterprise";
+
+import Processes from "./pages/Processes";
+import NewProcess from "./pages/NewProcess";
+import ProcessDetail from "./pages/ProcessDetail";
+
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
-    <ToastProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Redirecionamento inicial */}
-          <Route path="/" element={<Navigate to="/processos" replace />} />
+    <BrowserRouter>
+      <Routes>
+        {/* Tudo que usa Sidebar/Layout */}
+        <Route element={<DashboardLayout />}>
+          {/* DASHBOARD */}
+          <Route index element={<Dashboard />} />
 
-          {/* Layout principal */}
-          <Route element={<DashboardLayout />}>
-            {/* PROCESSOS */}
-            <Route path="/processos" element={<Processes />} />
-            <Route path="/processos/novo" element={<NewProcess />} />
-            <Route path="/processos/:id" element={<ProcessDetail />} />
+          {/* CLIENTES */}
+          <Route path="clientes" element={<Clients />} />
+          <Route path="clientes/novo" element={<NewClient />} />
+          <Route path="clientes/:id" element={<ClientDetail />} />
 
-            {/* CLIENTES */}
-            <Route path="/clientes" element={<Clients />} />
-            <Route path="/clientes/novo" element={<NewClient />} />
-          </Route>
+          {/* EMPRESAS */}
+          <Route path="empresas" element={<Enterprises />} />
+          <Route path="empresas/nova" element={<NewEnterprise />} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/processos" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ToastProvider>
+          {/* PROCESSOS */}
+          <Route path="processos" element={<Processes />} />
+          <Route path="processos/novo" element={<NewProcess />} />
+          <Route path="processos/:id" element={<ProcessDetail />} />
+        </Route>
+
+        {/* FALLBACK */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

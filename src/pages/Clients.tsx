@@ -1,103 +1,104 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { useToast } from "../components/Toast";
 
 type Client = {
   id: string;
   name: string;
-  document: string | null;
+  created_at: string;
 };
 
 export default function Clients() {
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchClients() {
+    async function loadClients() {
+      setLoading(true);
+      setError(null);
+
       const { data, error } = await supabase
         .from("clients")
-        .select("*")
+        .select("id, name, created_at")
         .order("created_at", { ascending: false });
 
       if (error) {
-        showToast("Erro ao buscar clientes", "error");
-      } else {
-        setClients(data as Client[]);
+        console.error(error);
+        setError("Erro ao carregar clientes.");
+        setClients([]);
+        setLoading(false);
+        return;
       }
 
+      setClients((data ?? []) as Client[]);
       setLoading(false);
     }
 
-    fetchClients();
+    loadClients();
   }, []);
 
-  if (loading) return <p style={{ padding: 20 }}>Carregando clientes...</p>;
+  if (loading) {
+    return <p className="p-6 text-gray-500">Carregando clientes...</p>;
+  }
+
+  if (error) {
+    return <p className="p-6 text-red-500">{error}</p>;
+  }
 
   return (
-    <div style={{ padding: 24 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
-        <h2>Clientes</h2>
+    <div className="p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Clientes</h1>
 
         <button
           onClick={() => navigate("/clientes/novo")}
-          style={{
-            background: "#2563eb",
-            color: "#fff",
-            border: "none",
-            padding: "10px 16px",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
         >
           + Novo Cliente
         </button>
       </div>
 
-      <table
-        style={{
-          width: "100%",
-          background: "#fff",
-          borderRadius: 8,
-          borderCollapse: "collapse",
-        }}
-      >
-        <thead>
-          <tr style={{ background: "#f3f4f6", textAlign: "left" }}>
-            <th style={{ padding: 12 }}>Nome</th>
-            <th style={{ padding: 12 }}>Documento</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {clients.map((client) => (
-            <tr key={client.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
-              <td style={{ padding: 12 }}>{client.name}</td>
-              <td style={{ padding: 12 }}>
-                {client.document ?? "-"}
-              </td>
-            </tr>
-          ))}
-
-          {clients.length === 0 && (
+      <div className="bg-white border rounded-lg overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 text-left">
             <tr>
-              <td colSpan={2} style={{ padding: 20, textAlign: "center" }}>
-                Nenhum cliente cadastrado
-              </td>
+              <th className="p-3">Cliente</th>
+              <th className="p-3">Criado em</th>
+              <th className="p-3 text-right">Ação</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {clients.length === 0 ? (
+              <tr>
+                <td className="p-3 text-gray-500" colSpan={3}>
+                  Nenhum cliente cadastrado.
+                </td>
+              </tr>
+            ) : (
+              clients.map((client) => (
+                <tr key={client.id} className="border-t">
+                  <td className="p-3">{client.name}</td>
+                  <td className="p-3 text-gray-600">
+                    {new Date(client.created_at).toLocaleDateString("pt-BR")}
+                  </td>
+                  <td className="p-3 text-right">
+                    <button
+                      onClick={() => navigate(`/clientes/${client.id}`)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Detalhes →
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

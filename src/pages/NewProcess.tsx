@@ -1,99 +1,155 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { ProcessStatus } from "../types/process";
-import { useToast } from "../components/Toast";
 
 export default function NewProcess() {
   const navigate = useNavigate();
-  const { showToast } = useToast();
 
-  const [processNumber, setProcessNumber] = useState("");
-  const [status, setStatus] = useState<ProcessStatus>("em_andamento");
-  const [dueDate, setDueDate] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
+  const [enterprises, setEnterprises] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const [clientId, setClientId] = useState("");
+  const [enterpriseId, setEnterpriseId] = useState("");
+  const [serviceId, setServiceId] = useState("");
+  const [agency, setAgency] = useState("");
+  const [dueDate, setDueDate] = useState("");
 
-    if (!processNumber) {
-      showToast("Informe o número do processo", "error");
-      return;
-    }
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    setSaving(true);
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
-    const { error } = await supabase.from("processes").insert({
-      process_number: processNumber,
-      status,
-      due_date: dueDate,
-    });
+  async function loadInitialData() {
+    const [{ data: clients }, { data: services }] = await Promise.all([
+      supabase.from("clients").select("*").order("name"),
+      supabase.from("services").select("*").order("name"),
+    ]);
 
-    setSaving(false);
+    setClients(clients || []);
+    setServices(services || []);
+  }
 
-    if (error) {
-      showToast("Erro ao salvar processo", "error");
-    } else {
-      showToast("Processo criado com sucesso");
+  async function loadEnterprises(clientId: string) {
+    setEnterpriseId("");
+    const { data } = await supabase
+      .from("enterprises")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("name");
+
+    setEnterprises(data || []);
+  }
+
+  async function handleSave() {
+    setError("");
+    setLoading(true);
+
+    try {
+      if (!clientId || !enterpriseId || !serviceId) {
+        setError("Cliente, empresa e serviço são obrigatórios.");
+        return;
+      }
+
+      const formattedDate = dueDate
+        ? new Date(dueDate).toISOString().split("T")[0]
+        : null;
+
+      const { error } = await supabase.from("processes").insert([
+        {
+          client_id: clientId,
+          enterprise_id: enterpriseId,
+          service_id: serviceId,
+          agency,
+          due_date: formattedDate,
+          status: "em_andamento",
+        },
+      ]);
+
+      if (error) throw error;
+
       navigate("/processos");
+    } catch (err: any) {
+      console.error(err);
+      setError("Erro ao salvar o processo.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 500 }}>
-      <h2>Novo Processo</h2>
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-semibold mb-6">Novo Processo</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 16 }}>
-          <label>Nº do Processo</label>
-          <input
-            value={processNumber}
-            onChange={(e) => setProcessNumber(e.target.value)}
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label>Status</label>
-          <select
-            value={status}
-            onChange={(e) =>
-              setStatus(e.target.value as ProcessStatus)
-            }
-            style={{ width: "100%", padding: 8 }}
-          >
-            <option value="em_andamento">Em andamento</option>
-            <option value="concluido">Concluído</option>
-            <option value="suspenso">Suspenso</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-        </div>
-
-        <div style={{ marginBottom: 24 }}>
-          <label>Prazo</label>
-          <input
-            type="date"
-            value={dueDate ?? ""}
-            onChange={(e) => setDueDate(e.target.value)}
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={saving}
-          style={{
-            background: "#2563eb",
-            color: "#fff",
-            padding: "10px 16px",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
+      <div className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
+        <select
+          className="w-full border rounded-lg px-3 py-2"
+          value={clientId}
+          onChange={(e) => {
+            setClientId(e.target.value);
+            loadEnterprises(e.target.value);
           }}
         >
-          {saving ? "Salvando..." : "Salvar Processo"}
+          <option value="">Selecione um cliente</option>
+          {clients.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="w-full border rounded-lg px-3 py-2"
+          value={enterpriseId}
+          onChange={(e) => setEnterpriseId(e.target.value)}
+        >
+          <option value="">Selecione uma empresa</option>
+          {enterprises.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="w-full border rounded-lg px-3 py-2"
+          value={serviceId}
+          onChange={(e) => setServiceId(e.target.value)}
+        >
+          <option value="">Selecione o serviço</option>
+          {services.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+
+        <input
+          className="w-full border rounded-lg px-3 py-2"
+          placeholder="Órgão / Agência"
+          value={agency}
+          onChange={(e) => setAgency(e.target.value)}
+        />
+
+        <input
+          type="date"
+          className="w-full border rounded-lg px-3 py-2"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+        />
+
+        {error && <p className="text-sm text-red-500">{error}</p>}
+
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+        >
+          {loading ? "Salvando..." : "Salvar Processo"}
         </button>
-      </form>
+      </div>
     </div>
   );
 }
