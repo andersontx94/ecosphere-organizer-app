@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import StatusBadge from "../components/ui/StatusBadge";
+import ProcessTasks from "../components/ProcessTasks";
 
 type ProcessStatus = "em_andamento" | "concluido" | "atrasado";
 
@@ -80,14 +81,17 @@ export default function ProcessDetail() {
         <p className="text-gray-700">{process.agency || "Não informado"}</p>
       </div>
 
+      {/* ✅ Tarefas do Processo */}
+      <ProcessTasks processId={process.id} />
+
       {/* Próximos módulos */}
       <div className="border-t pt-4 text-sm text-gray-500">
         Próximos módulos:
         <ul className="list-disc ml-5 mt-1">
-          <li>Histórico do processo</li>
+          <li>Histórico do processo (movimentações)</li>
           <li>Documentos</li>
           <li>Financeiro</li>
-          <li>Movimentações</li>
+          <li>Alertas/Notificações</li>
         </ul>
       </div>
     </div>
