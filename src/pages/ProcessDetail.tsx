@@ -77,9 +77,7 @@ export default function ProcessDetail() {
       {/* Órgão / Agência */}
       <div className="bg-white rounded-lg border p-4">
         <h2 className="font-semibold mb-1">Órgão / Agência</h2>
-        <p className="text-gray-700">
-          {process.agency || "Não informado"}
-        </p>
+        <p className="text-gray-700">{process.agency || "Não informado"}</p>
       </div>
 
       {/* Próximos módulos */}

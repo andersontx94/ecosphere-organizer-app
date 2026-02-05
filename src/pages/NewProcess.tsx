@@ -50,15 +50,8 @@ export default function NewProcess() {
     setLoading(true);
 
     try {
-      if (
-        !processNumber.trim() ||
-        !clientId ||
-        !enterpriseId ||
-        !serviceId
-      ) {
-        setError(
-          "Número do processo, cliente, empresa e serviço são obrigatórios."
-        );
+      if (!processNumber || !clientId || !enterpriseId || !serviceId) {
+        setError("Preencha todos os campos obrigatórios.");
         return;
       }
 
@@ -68,7 +61,7 @@ export default function NewProcess() {
 
       const { error } = await supabase.from("processes").insert([
         {
-          process_number: processNumber.trim(),
+          number: processNumber,
           client_id: clientId,
           enterprise_id: enterpriseId,
           service_id: serviceId,
@@ -81,7 +74,7 @@ export default function NewProcess() {
       if (error) throw error;
 
       navigate("/processos");
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setError("Erro ao salvar o processo.");
     } finally {
@@ -95,15 +88,13 @@ export default function NewProcess() {
 
       <div className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
 
-        {/* Número do Processo */}
         <input
           className="w-full border rounded-lg px-3 py-2"
-          placeholder="Número do Processo"
+          placeholder="Número do processo"
           value={processNumber}
           onChange={(e) => setProcessNumber(e.target.value)}
         />
 
-        {/* Cliente */}
         <select
           className="w-full border rounded-lg px-3 py-2"
           value={clientId}
@@ -113,7 +104,6 @@ export default function NewProcess() {
           }}
         >
           <option value="">Selecione um cliente</option>
-
           {clients.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -121,14 +111,12 @@ export default function NewProcess() {
           ))}
         </select>
 
-        {/* Empresa */}
         <select
           className="w-full border rounded-lg px-3 py-2"
           value={enterpriseId}
           onChange={(e) => setEnterpriseId(e.target.value)}
         >
           <option value="">Selecione uma empresa</option>
-
           {enterprises.map((e) => (
             <option key={e.id} value={e.id}>
               {e.name}
@@ -136,14 +124,12 @@ export default function NewProcess() {
           ))}
         </select>
 
-        {/* Serviço */}
         <select
           className="w-full border rounded-lg px-3 py-2"
           value={serviceId}
           onChange={(e) => setServiceId(e.target.value)}
         >
           <option value="">Selecione o serviço</option>
-
           {services.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name}
@@ -151,7 +137,6 @@ export default function NewProcess() {
           ))}
         </select>
 
-        {/* Órgão */}
         <input
           className="w-full border rounded-lg px-3 py-2"
           placeholder="Órgão / Agência"
@@ -159,7 +144,6 @@ export default function NewProcess() {
           onChange={(e) => setAgency(e.target.value)}
         />
 
-        {/* Data */}
         <input
           type="date"
           className="w-full border rounded-lg px-3 py-2"
