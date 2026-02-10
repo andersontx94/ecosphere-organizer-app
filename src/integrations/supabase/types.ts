@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -24,6 +24,7 @@ export type Database = {
           due_date: string
           id: string
           notes: string | null
+          organization_id: string | null
           paid_at: string | null
           project_id: string | null
           status: Database["public"]["Enums"]["payable_status"] | null
@@ -39,6 +40,7 @@ export type Database = {
           due_date: string
           id?: string
           notes?: string | null
+          organization_id?: string | null
           paid_at?: string | null
           project_id?: string | null
           status?: Database["public"]["Enums"]["payable_status"] | null
@@ -54,6 +56,7 @@ export type Database = {
           due_date?: string
           id?: string
           notes?: string | null
+          organization_id?: string | null
           paid_at?: string | null
           project_id?: string | null
           status?: Database["public"]["Enums"]["payable_status"] | null
@@ -86,6 +89,7 @@ export type Database = {
           due_date: string
           id: string
           notes: string | null
+          organization_id: string | null
           project_id: string | null
           received_at: string | null
           status: Database["public"]["Enums"]["receivable_status"] | null
@@ -100,6 +104,7 @@ export type Database = {
           due_date: string
           id?: string
           notes?: string | null
+          organization_id?: string | null
           project_id?: string | null
           received_at?: string | null
           status?: Database["public"]["Enums"]["receivable_status"] | null
@@ -114,6 +119,7 @@ export type Database = {
           due_date?: string
           id?: string
           notes?: string | null
+          organization_id?: string | null
           project_id?: string | null
           received_at?: string | null
           status?: Database["public"]["Enums"]["receivable_status"] | null
@@ -234,7 +240,9 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          organization_id: string | null
           phone: string | null
+          responsible: string | null
           status: string | null
           updated_at: string
           user_id: string
@@ -249,7 +257,9 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          organization_id?: string | null
           phone?: string | null
+          responsible?: string | null
           status?: string | null
           updated_at?: string
           user_id: string
@@ -264,7 +274,9 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          organization_id?: string | null
           phone?: string | null
+          responsible?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string
@@ -284,6 +296,7 @@ export type Database = {
           issue_date: string | null
           name: string
           notes: string | null
+          organization_id: string | null
           project_id: string | null
           updated_at: string
           user_id: string
@@ -300,6 +313,7 @@ export type Database = {
           issue_date?: string | null
           name: string
           notes?: string | null
+          organization_id?: string | null
           project_id?: string | null
           updated_at?: string
           user_id: string
@@ -316,6 +330,7 @@ export type Database = {
           issue_date?: string | null
           name?: string
           notes?: string | null
+          organization_id?: string | null
           project_id?: string | null
           updated_at?: string
           user_id?: string
@@ -353,6 +368,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          organization_id: string | null
           status: string | null
           updated_at: string
           user_id: string
@@ -365,6 +381,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          organization_id?: string | null
           status?: string | null
           updated_at?: string
           user_id: string
@@ -377,6 +394,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          organization_id?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string
@@ -397,16 +415,24 @@ export type Database = {
           client_id: string | null
           created_at: string
           decision_date: string | null
+          due_date: string | null
           enterprise_id: string | null
           expiry_date: string | null
           id: string
           internal_deadline: string | null
           license_type_id: string | null
           notes: string | null
+          owner_id: string | null
+          organization_id: string | null
           process_number: string | null
           process_type: string
           protocol_date: string | null
+          protocol_number: string | null
           risk_status: string | null
+          service_id: string | null
+          start_date: string | null
+          city: string | null
+          state: string | null
           status: string
           total_value: number | null
           updated_at: string
@@ -417,16 +443,24 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           decision_date?: string | null
+          due_date?: string | null
           enterprise_id?: string | null
           expiry_date?: string | null
           id?: string
           internal_deadline?: string | null
           license_type_id?: string | null
           notes?: string | null
+          owner_id?: string | null
+          organization_id?: string | null
           process_number?: string | null
           process_type: string
           protocol_date?: string | null
+          protocol_number?: string | null
           risk_status?: string | null
+          service_id?: string | null
+          start_date?: string | null
+          city?: string | null
+          state?: string | null
           status?: string
           total_value?: number | null
           updated_at?: string
@@ -437,16 +471,24 @@ export type Database = {
           client_id?: string | null
           created_at?: string
           decision_date?: string | null
+          due_date?: string | null
           enterprise_id?: string | null
           expiry_date?: string | null
           id?: string
           internal_deadline?: string | null
           license_type_id?: string | null
           notes?: string | null
+          owner_id?: string | null
+          organization_id?: string | null
           process_number?: string | null
           process_type?: string
           protocol_date?: string | null
+          protocol_number?: string | null
           risk_status?: string | null
+          service_id?: string | null
+          start_date?: string | null
+          city?: string | null
+          state?: string | null
           status?: string
           total_value?: number | null
           updated_at?: string
@@ -472,6 +514,13 @@ export type Database = {
             columns: ["license_type_id"]
             isOneToOne: false
             referencedRelation: "license_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "environmental_processes_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -511,6 +560,7 @@ export type Database = {
           initial_balance: number | null
           is_default: boolean | null
           name: string
+          organization_id: string | null
           user_id: string
         }
         Insert: {
@@ -520,6 +570,7 @@ export type Database = {
           initial_balance?: number | null
           is_default?: boolean | null
           name: string
+          organization_id?: string | null
           user_id: string
         }
         Update: {
@@ -529,6 +580,7 @@ export type Database = {
           initial_balance?: number | null
           is_default?: boolean | null
           name?: string
+          organization_id?: string | null
           user_id?: string
         }
         Relationships: []
@@ -544,6 +596,7 @@ export type Database = {
           description: string | null
           id: string
           notes: string | null
+          organization_id: string | null
           project_id: string | null
           type: Database["public"]["Enums"]["financial_type"]
           updated_at: string
@@ -559,6 +612,7 @@ export type Database = {
           description?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           project_id?: string | null
           type: Database["public"]["Enums"]["financial_type"]
           updated_at?: string
@@ -574,6 +628,7 @@ export type Database = {
           description?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           project_id?: string | null
           type?: Database["public"]["Enums"]["financial_type"]
           updated_at?: string
@@ -639,6 +694,7 @@ export type Database = {
           due_date: string | null
           id: string
           notes: string | null
+          organization_id: string | null
           paid_at: string | null
           process_id: string
           status: string | null
@@ -653,6 +709,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           paid_at?: string | null
           process_id: string
           status?: string | null
@@ -667,6 +724,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           paid_at?: string | null
           process_id?: string
           status?: string | null
@@ -691,6 +749,7 @@ export type Database = {
           due_date: string | null
           id: string
           notes: string | null
+          organization_id: string | null
           payment_method: string | null
           process_id: string
           received_at: string | null
@@ -705,6 +764,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           payment_method?: string | null
           process_id: string
           received_at?: string | null
@@ -719,6 +779,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           notes?: string | null
+          organization_id?: string | null
           payment_method?: string | null
           process_id?: string
           received_at?: string | null
@@ -745,6 +806,7 @@ export type Database = {
           name: string
           notes: string | null
           order_index: number | null
+          organization_id: string | null
           process_id: string
           responsible: string | null
           status: string | null
@@ -758,6 +820,7 @@ export type Database = {
           name: string
           notes?: string | null
           order_index?: number | null
+          organization_id?: string | null
           process_id: string
           responsible?: string | null
           status?: string | null
@@ -771,6 +834,7 @@ export type Database = {
           name?: string
           notes?: string | null
           order_index?: number | null
+          organization_id?: string | null
           process_id?: string
           responsible?: string | null
           status?: string | null
@@ -794,6 +858,7 @@ export type Database = {
           is_default: boolean | null
           is_licensing: boolean | null
           name: string
+          organization_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -803,6 +868,7 @@ export type Database = {
           is_default?: boolean | null
           is_licensing?: boolean | null
           name: string
+          organization_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -812,6 +878,7 @@ export type Database = {
           is_default?: boolean | null
           is_licensing?: boolean | null
           name?: string
+          organization_id?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -819,6 +886,7 @@ export type Database = {
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
+          active_organization_id: string | null
           cnpj: string | null
           cpf: string | null
           created_at: string
@@ -833,6 +901,7 @@ export type Database = {
         }
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"]
+          active_organization_id?: string | null
           cnpj?: string | null
           cpf?: string | null
           created_at?: string
@@ -847,6 +916,7 @@ export type Database = {
         }
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"]
+          active_organization_id?: string | null
           cnpj?: string | null
           cpf?: string | null
           created_at?: string
@@ -910,6 +980,7 @@ export type Database = {
           id: string
           name: string
           notes: string | null
+          organization_id: string | null
           payment_method: string | null
           start_date: string | null
           status: string | null
@@ -926,6 +997,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string | null
+          organization_id?: string | null
           payment_method?: string | null
           start_date?: string | null
           status?: string | null
@@ -942,6 +1014,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string | null
+          organization_id?: string | null
           payment_method?: string | null
           start_date?: string | null
           status?: string | null
@@ -975,7 +1048,9 @@ export type Database = {
           due_date: string | null
           enterprise_id: string | null
           id: string
+          organization_id: string | null
           priority: Database["public"]["Enums"]["task_priority"] | null
+          process_id: string | null
           project_id: string | null
           status: Database["public"]["Enums"]["task_status"] | null
           title: string
@@ -990,7 +1065,9 @@ export type Database = {
           due_date?: string | null
           enterprise_id?: string | null
           id?: string
+          organization_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"] | null
+          process_id?: string | null
           project_id?: string | null
           status?: Database["public"]["Enums"]["task_status"] | null
           title: string
@@ -1005,7 +1082,9 @@ export type Database = {
           due_date?: string | null
           enterprise_id?: string | null
           id?: string
+          organization_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"] | null
+          process_id?: string | null
           project_id?: string | null
           status?: Database["public"]["Enums"]["task_status"] | null
           title?: string
@@ -1032,6 +1111,510 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_contacts: {
+        Row: {
+          id: string
+          organization_id: string | null
+          client_id: string
+          name: string
+          role: string | null
+          email: string | null
+          phone: string | null
+          is_primary: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          client_id: string
+          name: string
+          role?: string | null
+          email?: string | null
+          phone?: string | null
+          is_primary?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          client_id?: string
+          name?: string
+          role?: string | null
+          email?: string | null
+          phone?: string | null
+          is_primary?: boolean | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_contacts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          slug: string | null
+          created_by: string | null
+          owner_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug?: string | null
+          created_by?: string | null
+          owner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string | null
+          created_by?: string | null
+          owner_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      organization_members: {
+        Row: {
+          id: string
+          organization_id: string
+          user_id: string
+          role: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          user_id: string
+          role?: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          user_id?: string
+          role?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          id: string
+          organization_id: string | null
+          user_id: string | null
+          name: string
+          category: string | null
+          description: string | null
+          default_price: number | null
+          unit: string | null
+          active: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          name: string
+          category?: string | null
+          description?: string | null
+          default_price?: number | null
+          unit?: string | null
+          active?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+          name?: string
+          category?: string | null
+          description?: string | null
+          default_price?: number | null
+          unit?: string | null
+          active?: boolean | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      process_services: {
+        Row: {
+          id: string
+          organization_id: string | null
+          process_id: string
+          service_id: string
+          qty: number | null
+          unit_price: number | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          process_id: string
+          service_id: string
+          qty?: number | null
+          unit_price?: number | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          process_id?: string
+          service_id?: string
+          qty?: number | null
+          unit_price?: number | null
+          notes?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_services_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_services_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          id: string
+          organization_id: string | null
+          client_id: string
+          enterprise_id: string | null
+          process_id: string | null
+          number: string | null
+          status: string | null
+          issue_date: string | null
+          due_date: string | null
+          notes: string | null
+          total: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          client_id: string
+          enterprise_id?: string | null
+          process_id?: string | null
+          number?: string | null
+          status?: string | null
+          issue_date?: string | null
+          due_date?: string | null
+          notes?: string | null
+          total?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          client_id?: string
+          enterprise_id?: string | null
+          process_id?: string | null
+          number?: string | null
+          status?: string | null
+          issue_date?: string | null
+          due_date?: string | null
+          notes?: string | null
+          total?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_enterprise_id_fkey"
+            columns: ["enterprise_id"]
+            isOneToOne: false
+            referencedRelation: "enterprises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          id: string
+          organization_id: string | null
+          invoice_id: string
+          description: string
+          qty: number | null
+          unit_price: number | null
+          total: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          invoice_id: string
+          description: string
+          qty?: number | null
+          unit_price?: number | null
+          total?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          invoice_id?: string
+          description?: string
+          qty?: number | null
+          unit_price?: number | null
+          total?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          id: string
+          organization_id: string | null
+          invoice_id: string
+          paid_at: string | null
+          amount: number
+          method: string | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          invoice_id: string
+          paid_at?: string | null
+          amount: number
+          method?: string | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          invoice_id?: string
+          paid_at?: string | null
+          amount?: number
+          method?: string | null
+          notes?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          description: string | null
+          price_cents: number
+          billing_period: string
+          is_active: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          description?: string | null
+          price_cents?: number
+          billing_period?: string
+          is_active?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          description?: string | null
+          price_cents?: number
+          billing_period?: string
+          is_active?: boolean | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      usage_limits: {
+        Row: {
+          id: string
+          plan_id: string
+          key: string
+          limit_value: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          plan_id: string
+          key: string
+          limit_value: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          plan_id?: string
+          key?: string
+          limit_value?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_limits_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          organization_id: string
+          plan_id: string
+          status: string
+          started_at: string | null
+          current_period_end: string | null
+          cancel_at_period_end: boolean | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          plan_id: string
+          status?: string
+          started_at?: string | null
+          current_period_end?: string | null
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          plan_id?: string
+          status?: string
+          started_at?: string | null
+          current_period_end?: string | null
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_events: {
+        Row: {
+          id: string
+          organization_id: string
+          key: string
+          quantity: number
+          occurred_at: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          key: string
+          quantity?: number
+          occurred_at?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          key?: string
+          quantity?: number
+          occurred_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1216,3 +1799,4 @@ export const Constants = {
     },
   },
 } as const
+
