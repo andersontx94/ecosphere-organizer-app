@@ -1,117 +1,189 @@
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StatusBadge from "../components/ui/StatusBadge";
 import { useProcesses } from "../hooks/useProcesses";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FolderKanban, Plus } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Processes() {
   const navigate = useNavigate();
   const { processes, loading, getComputedStatus } = useProcesses();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dueSoonOnly, setDueSoonOnly] = useState(false);
 
   function formatDate(date: string) {
     const [year, month, day] = date.split("-");
     return `${day}/${month}/${year}`;
   }
 
-  /**
-   * 🔒 Filtro de limpeza (FRONTEND ONLY)
-   * Esconde processos de teste ou incompletos
-   */
-  const visibleProcesses = processes.filter((process) => {
-    const number = process.process_number;
+  const visibleProcesses = useMemo(() => {
+    return processes.filter((process) => {
+      if (statusFilter !== "all" && process.status !== statusFilter) {
+        return false;
+      }
 
-    if (!number) return false;
+      if (dueSoonOnly) {
+        if (!process.due_date) return false;
+        const today = new Date();
+        const due = new Date(process.due_date + "T00:00:00");
+        const diffDays =
+          (due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+        if (diffDays < 0 || diffDays > 15) return false;
+      }
 
-    // contém letras (ex: kkkkk)
-    if (/[a-zA-Z]/.test(number)) return false;
-
-    // muito curto (ex: 55555)
-    if (number.length < 7) return false;
-
-    return true;
-  });
+      return true;
+    });
+  }, [processes, statusFilter, dueSoonOnly]);
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Processos
-        </h1>
+    <div className="p-6 space-y-6">
+      <PageHeader
+        title="Processos"
+        description="Licenças, protocolos e prazos ambientais."
+        action={
+          <Button onClick={() => navigate("/processos/novo")}>
+            <Plus className="h-4 w-4" />
+            Novo processo
+          </Button>
+        }
+      />
 
-        <button
-          onClick={() => navigate("/processos/novo")}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-        >
-          + Novo Processo
-        </button>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        {loading ? (
-          <div className="p-6 text-gray-500">Carregando...</div>
-        ) : visibleProcesses.length === 0 ? (
-          <div className="p-6 text-gray-500 italic">
-            Nenhum processo válido para exibição.
+      <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)]">
+        <CardHeader>
+          <CardTitle className="text-base">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Status</label>
+            <select
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Todos</option>
+              <option value="Em andamento">Em andamento</option>
+              <option value="Pendente">Pendente</option>
+              <option value="Concluído">Concluído</option>
+              <option value="Suspenso">Suspenso</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
           </div>
-        ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr className="text-left text-sm text-gray-600">
-                <th className="px-6 py-3">Processo</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Prazo</th>
-                <th className="px-6 py-3 text-right">Ação</th>
-              </tr>
-            </thead>
 
-            <tbody>
-              {visibleProcesses.map((process) => {
-                const computed = getComputedStatus(process);
+          <label className="flex items-center gap-2 text-sm mt-6 md:mt-0">
+            <input
+              type="checkbox"
+              checked={dueSoonOnly}
+              onChange={(e) => setDueSoonOnly(e.target.checked)}
+            />
+            Vencimento nos próximos 15 dias
+          </label>
+        </CardContent>
+      </Card>
 
-                return (
-                  <tr
-                    key={process.id}
-                    onClick={() =>
-                      navigate(`/processos/${process.id}`)
-                    }
-                    className="border-b last:border-none hover:bg-gray-50 cursor-pointer transition"
-                  >
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-medium text-gray-800">
-                        {process.process_number}
-                      </span>
-                    </td>
+      <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)] overflow-hidden">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-6 text-muted-foreground">Carregando...</div>
+          ) : visibleProcesses.length === 0 ? (
+            <div className="p-8 text-center space-y-3">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <FolderKanban className="h-6 w-6" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Nenhum processo encontrado com os filtros selecionados.
+              </p>
+              <Button onClick={() => navigate("/processos/novo")}>
+                <Plus className="h-4 w-4" />
+                Criar processo
+              </Button>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead className="bg-muted/60 border-b border-border/60">
+                <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="px-6 py-3">Processo</th>
+                  <th className="px-6 py-3">Tipo</th>
+                  <th className="px-6 py-3">Cliente</th>
+                  <th className="px-6 py-3">Empreendimento</th>
+                  <th className="px-6 py-3">Órgão</th>
+                  <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">Vencimento</th>
+                  <th className="px-6 py-3 text-right">Ação</th>
+                </tr>
+              </thead>
 
-                    <td className="px-6 py-4">
-                      <StatusBadge status={computed.visualStatus}>
-                        {computed.label}
-                      </StatusBadge>
-                    </td>
+              <tbody>
+                {visibleProcesses.map((process, index) => {
+                  const computed = getComputedStatus(process);
+                  const isDueSoon = computed.visualStatus === "vence_em_breve";
+                  const isOverdue = computed.visualStatus === "atrasado";
 
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      {process.due_date ? (
-                        `📅 ${formatDate(process.due_date)}`
-                      ) : (
-                        <span className="italic text-gray-400">
-                          Sem prazo definido
-                        </span>
-                      )}
-                    </td>
-
-                    <td
-                      className="px-6 py-4 text-right text-blue-600 font-medium"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/processos/${process.id}`);
-                      }}
+                  return (
+                    <tr
+                      key={process.id}
+                      onClick={() => navigate(`/processos/${process.id}`)}
+                      className={`border-b border-border/60 last:border-none hover:bg-muted/40 cursor-pointer transition ${index % 2 === 1 ? "bg-muted/30" : ""}`}
                     >
-                      Detalhes →
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-foreground">
+                          {process.process_number ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {process.process_type ?? "—"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {process.clients?.name ?? "—"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {process.enterprises?.name ?? "—"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {process.agency ?? "—"}
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={computed.visualStatus}>
+                          {computed.label}
+                        </StatusBadge>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {process.due_date ? (
+                          <span
+                            className={
+                              isOverdue
+                                ? "text-destructive font-medium"
+                                : isDueSoon
+                                ? "text-amber-600 font-medium"
+                                : "text-muted-foreground"
+                            }
+                          >
+                            {formatDate(process.due_date)}
+                          </span>
+                        ) : (
+                          <span className="italic text-muted-foreground">Sem prazo</span>
+                        )}
+                      </td>
+                      <td
+                        className="px-6 py-4 text-right"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/processos/${process.id}`);
+                        }}
+                      >
+                        <Button variant="ghost" className="text-primary hover:text-primary/80">
+                          Detalhes
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

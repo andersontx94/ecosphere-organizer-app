@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export interface ProcessRevenue {
   id: string;
@@ -44,38 +44,42 @@ export interface ProcessFinancialSummary {
 }
 
 export function useProcessRevenues(processId: string | undefined) {
+  const { activeOrganization } = useOrganization();
   return useQuery({
-    queryKey: ['process_revenues', processId],
+    queryKey: ['process_revenues', activeOrganization?.id, processId],
     queryFn: async () => {
-      if (!processId) return [];
+      if (!processId || !activeOrganization) return [];
       const { data, error } = await supabase
         .from('process_revenues')
         .select('*')
         .eq('process_id', processId)
+        .eq('organization_id', activeOrganization.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as ProcessRevenue[];
     },
-    enabled: !!processId,
+    enabled: !!processId && !!activeOrganization,
   });
 }
 
 export function useProcessCosts(processId: string | undefined) {
+  const { activeOrganization } = useOrganization();
   return useQuery({
-    queryKey: ['process_costs', processId],
+    queryKey: ['process_costs', activeOrganization?.id, processId],
     queryFn: async () => {
-      if (!processId) return [];
+      if (!processId || !activeOrganization) return [];
       const { data, error } = await supabase
         .from('process_costs')
         .select('*')
         .eq('process_id', processId)
+        .eq('organization_id', activeOrganization.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as ProcessCost[];
     },
-    enabled: !!processId,
+    enabled: !!processId && !!activeOrganization,
   });
 }
 
@@ -102,14 +106,14 @@ export function useProcessFinancialSummary(processId: string | undefined) {
 
 export function useCreateProcessRevenue() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
     mutationFn: async (data: Omit<ProcessRevenue, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      if (!user) throw new Error('User not authenticated');
+      if (!activeOrganization) throw new Error('Organization not selected');
       const { data: revenue, error } = await supabase
         .from('process_revenues')
-        .insert({ ...data, user_id: user.id })
+        .insert({ ...data, organization_id: activeOrganization.id })
         .select()
         .single();
       
@@ -163,14 +167,14 @@ export function useDeleteProcessRevenue() {
 
 export function useCreateProcessCost() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
     mutationFn: async (data: Omit<ProcessCost, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      if (!user) throw new Error('User not authenticated');
+      if (!activeOrganization) throw new Error('Organization not selected');
       const { data: cost, error } = await supabase
         .from('process_costs')
-        .insert({ ...data, user_id: user.id })
+        .insert({ ...data, organization_id: activeOrganization.id })
         .select()
         .single();
       
@@ -246,3 +250,5 @@ export const COST_STATUSES = [
   { value: 'pendente', label: 'Pendente' },
   { value: 'pago', label: 'Pago' },
 ];
+
+

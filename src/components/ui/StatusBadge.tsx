@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { ProcessStatus } from "../../hooks/useProcesses";
+import { Badge } from "@/components/ui/badge";
 
 interface StatusBadgeProps {
   status: ProcessStatus;
@@ -7,15 +8,17 @@ interface StatusBadgeProps {
 }
 
 export default function StatusBadge({ status, children }: StatusBadgeProps) {
-  const base =
-    "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium";
+  const variants: Record<ProcessStatus, "warning" | "success" | "destructive"> =
+    {
+      em_andamento: "warning",
+      concluido: "success",
+      atrasado: "destructive",
+      vence_em_breve: "warning",
+    };
 
-  const styles: Record<ProcessStatus, string> = {
-    em_andamento: "bg-yellow-100 text-yellow-800",
-    concluido: "bg-green-100 text-green-800",
-    atrasado: "bg-red-100 text-red-800",
-    vence_em_breve: "bg-orange-100 text-orange-800",
-  };
-
-  return <span className={`${base} ${styles[status]}`}>{children}</span>;
+  return (
+    <Badge variant={variants[status]} className="px-3 py-1 text-xs font-medium">
+      {children}
+    </Badge>
+  );
 }

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -13,46 +13,46 @@ export interface ProjectWithRelations extends Project {
 }
 
 export function useProjects() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['projects', user?.id],
+    queryKey: ['projects', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*, clients(name), enterprises(name)')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as ProjectWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useActiveProjects() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['projects', 'active', user?.id],
+    queryKey: ['projects', 'active', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('projects')
         .select('*, clients(name), enterprises(name)')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .eq('status', 'em_andamento')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data as ProjectWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useProject(id: string | undefined) {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
     queryKey: ['projects', id],
@@ -61,25 +61,25 @@ export function useProject(id: string | undefined) {
         .from('projects')
         .select('*, clients(name), enterprises(name)')
         .eq('id', id!)
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .single();
 
       if (error) throw error;
       return data as ProjectWithRelations;
     },
-    enabled: !!id && !!user,
+    enabled: !!id && !!activeOrganization,
   });
 }
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (data: Omit<ProjectInsert, 'user_id'>) => {
+    mutationFn: async (data: Omit<ProjectInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('projects')
-        .insert({ ...data, user_id: user!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id })
         .select()
         .single();
 
@@ -126,3 +126,4 @@ export function useDeleteProject() {
     },
   });
 }
+

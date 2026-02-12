@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type Document = Database['public']['Tables']['documents']['Row'];
@@ -13,39 +13,39 @@ export interface DocumentWithRelations extends Document {
 }
 
 export function useDocuments() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['documents', user?.id],
+    queryKey: ['documents', activeOrganization?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!activeOrganization) return [];
       const { data, error } = await supabase
         .from('documents')
         .select('*, clients(name), enterprises(name)')
-        .eq('user_id', user.id)
+        .eq('organization_id', activeOrganization.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as DocumentWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useUpcomingDeadlines(days: number = 30) {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
   const today = new Date();
   const futureDate = new Date();
   futureDate.setDate(today.getDate() + days);
 
   return useQuery({
-    queryKey: ['documents', 'deadlines', user?.id, days],
+    queryKey: ['documents', 'deadlines', activeOrganization?.id, days],
     queryFn: async () => {
-      if (!user) return [];
+      if (!activeOrganization) return [];
       const { data, error } = await supabase
         .from('documents')
         .select('*, clients(name), enterprises(name)')
-        .eq('user_id', user.id)
+        .eq('organization_id', activeOrganization.id)
         .not('expiry_date', 'is', null)
         .lte('expiry_date', futureDate.toISOString().split('T')[0])
         .order('expiry_date', { ascending: true });
@@ -53,41 +53,41 @@ export function useUpcomingDeadlines(days: number = 30) {
       if (error) throw error;
       return data as DocumentWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useDocument(id: string | undefined) {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
     queryKey: ['documents', id],
     queryFn: async () => {
-      if (!id || !user) return null;
+      if (!id || !activeOrganization) return null;
       const { data, error } = await supabase
         .from('documents')
         .select('*, clients(name), enterprises(name)')
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('organization_id', activeOrganization.id)
         .single();
       
       if (error) throw error;
       return data as DocumentWithRelations;
     },
-    enabled: !!id && !!user,
+    enabled: !!id && !!activeOrganization,
   });
 }
 
 export function useCreateDocument() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (data: Omit<DocumentInsert, 'user_id'>) => {
-      if (!user) throw new Error('User not authenticated');
+    mutationFn: async (data: Omit<DocumentInsert, 'user_id' | 'organization_id'>) => {
+      if (!activeOrganization) throw new Error('Organization not selected');
       const { data: document, error } = await supabase
         .from('documents')
-        .insert({ ...data, user_id: user.id })
+        .insert({ ...data, organization_id: activeOrganization.id })
         .select()
         .single();
       
@@ -153,3 +153,5 @@ export function getDocumentStatus(expiryDate: string | null): 'valido' | 'proxim
   if (diffDays <= 30) return 'proximo_vencimento';
   return 'valido';
 }
+
+

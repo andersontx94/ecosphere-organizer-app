@@ -1,104 +1,251 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '../supabase'
+﻿import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
+
+type ClientOption = {
+  id: string;
+  name: string;
+};
 
 export default function NewEnterprise() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
+  const [searchParams] = useSearchParams();
 
-  const [name, setName] = useState('')
-  const [cnpj, setCnpj] = useState('')
-  const [state, setState] = useState('')
-  const [city, setCity] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [clients, setClients] = useState<ClientOption[]>([]);
+  const [clientId, setClientId] = useState<string>(
+    searchParams.get("client_id") ?? ""
+  );
+  const [name, setName] = useState("");
+  const [cpfCnpj, setCpfCnpj] = useState("");
+  const [activity, setActivity] = useState("");
+  const [address, setAddress] = useState("");
+  const [state, setState] = useState("");
+  const [city, setCity] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
+  const [notes, setNotes] = useState("");
+  const [active, setActive] = useState(true);
+
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    async function loadClients() {
+      if (!activeOrganization) return;
+      const { data } = await supabase
+        .from("clients")
+        .select("id, name")
+        .eq("organization_id", activeOrganization.id)
+        .order("name");
+      setClients((data as ClientOption[]) || []);
+    }
+
+    loadClients();
+  }, [user]);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     if (!name.trim()) {
-      setError('Nome da empresa é obrigatório')
-      return
+      setError("Nome do empreendimento é obrigatório.");
+      return;
     }
 
-    setLoading(true)
+    if (!clientId) {
+      setError("Selecione um cliente.");
+      return;
+    }
 
-    const { error } = await supabase
-      .from('enterprises')
-      .insert([
-        {
-          name,
-          cnpj,
-          state,
-          city,
-        },
-      ])
+    if (!user || !activeOrganization) {
+      setError("Faça login para salvar o empreendimento.");
+      return;
+    }
 
-    setLoading(false)
+    const latValue = lat.trim() ? Number(lat.replace(",", ".")) : null;
+    const lngValue = lng.trim() ? Number(lng.replace(",", ".")) : null;
+    if ((lat && Number.isNaN(latValue)) || (lng && Number.isNaN(lngValue))) {
+      setError("Coordenadas inválidas.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase.from("enterprises").insert([
+      {
+        name: name.trim(),
+        client_id: clientId,
+        cpf_cnpj: cpfCnpj.trim() || null,
+        activity: activity.trim() || null,
+        address: address.trim() || null,
+        state: state.trim() || null,
+        city: city.trim() || null,
+        lat: latValue,
+        lng: lngValue,
+        notes: notes.trim() || null,
+        active,
+        organization_id: activeOrganization.id,
+      },
+    ]);
+
+    setLoading(false);
 
     if (error) {
-      setError('Erro ao salvar empresa')
-      return
+      setError(error.message);
+      return;
     }
 
-    navigate('/empresas')
+    navigate("/empresas");
   }
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded shadow">
-      <h1 className="text-xl font-semibold mb-4">Nova Empresa</h1>
+    <div className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-2xl font-semibold mb-5">Novo Empreendimento</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Cliente</label>
+            <select
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="">Selecione um cliente</option>
+              {clients.map((client) => (
+                <option key={client.id} value={client.id}>
+                  {client.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Nome</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+              placeholder="Nome da unidade"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              CPF/CNPJ da unidade
+            </label>
+            <input
+              type="text"
+              value={cpfCnpj}
+              onChange={(e) => setCpfCnpj(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Atividade/Ramo
+            </label>
+            <input
+              type="text"
+              value={activity}
+              onChange={(e) => setActivity(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+        </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">Nome</label>
+          <label className="block text-sm font-medium mb-1">Endereço</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
             className="w-full border rounded px-3 py-2"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">CNPJ</label>
-          <input
-            type="text"
-            value={cnpj}
-            onChange={(e) => setCnpj(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Cidade</label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Estado</label>
+            <input
+              type="text"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Latitude (opcional)
+            </label>
+            <input
+              type="text"
+              value={lat}
+              onChange={(e) => setLat(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Longitude (opcional)
+            </label>
+            <input
+              type="text"
+              value={lng}
+              onChange={(e) => setLng(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Estado</label>
-          <input
-            type="text"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
+          <label className="block text-sm font-medium mb-1">Observações</label>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
             className="w-full border rounded px-3 py-2"
+            rows={3}
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Cidade</label>
+        <label className="flex items-center gap-2 text-sm">
           <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            type="checkbox"
+            checked={active}
+            onChange={(e) => setActive(e.target.checked)}
           />
-        </div>
+          Empreendimento ativo
+        </label>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-60"
         >
-          {loading ? 'Salvando...' : 'Salvar Empresa'}
+          {loading ? "Salvando..." : "Salvar Empreendimento"}
         </button>
       </form>
     </div>
-  )
+  );
 }
+

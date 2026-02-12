@@ -1,104 +1,128 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
-
-type Client = {
-  id: string;
-  name: string;
-  created_at: string;
-};
+﻿import { useNavigate } from "react-router-dom";
+import { useClients } from "@/hooks/useClients";
+import type { Client } from "@/hooks/useClients";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Users } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
 
 export default function Clients() {
   const navigate = useNavigate();
+  const { data: clients, isLoading, error } = useClients();
+  const safeClients: Client[] = clients ?? [];
 
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function loadClients() {
-      setLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from("clients")
-        .select("id, name, created_at")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error(error);
-        setError("Erro ao carregar clientes.");
-        setClients([]);
-        setLoading(false);
-        return;
-      }
-
-      setClients((data ?? []) as Client[]);
-      setLoading(false);
-    }
-
-    loadClients();
-  }, []);
-
-  if (loading) {
-    return <p className="p-6 text-gray-500">Carregando clientes...</p>;
+  if (isLoading) {
+    return <p className="p-6 text-muted-foreground">Carregando clientes...</p>;
   }
 
   if (error) {
-    return <p className="p-6 text-red-500">{error}</p>;
+    const message =
+      typeof error === "object" && error && "message" in error
+        ? (error as { message?: string }).message
+        : "Erro desconhecido.";
+    return (
+      <div className="p-6 space-y-2">
+        <p className="text-destructive font-medium">Erro ao carregar clientes.</p>
+        <p className="text-sm text-destructive/80">Detalhe: {message}</p>
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Clientes</h1>
+      <PageHeader
+        title="Clientes"
+        description="Contratantes cadastrados na consultoria."
+        action={
+          <Button onClick={() => navigate("/clientes/novo")} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4" />
+            Novo Cliente
+          </Button>
+        }
+      />
 
-        <button
-          onClick={() => navigate("/clientes/novo")}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-        >
-          + Novo Cliente
-        </button>
-      </div>
-
-      <div className="bg-white border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left">
-            <tr>
-              <th className="p-3">Cliente</th>
-              <th className="p-3">Criado em</th>
-              <th className="p-3 text-right">Ação</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {clients.length === 0 ? (
-              <tr>
-                <td className="p-3 text-gray-500" colSpan={3}>
-                  Nenhum cliente cadastrado.
-                </td>
-              </tr>
-            ) : (
-              clients.map((client) => (
-                <tr key={client.id} className="border-t">
-                  <td className="p-3">{client.name}</td>
-                  <td className="p-3 text-gray-600">
-                    {new Date(client.created_at).toLocaleDateString("pt-BR")}
-                  </td>
-                  <td className="p-3 text-right">
-                    <button
-                      onClick={() => navigate(`/clientes/${client.id}`)}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Detalhes →
-                    </button>
-                  </td>
+      {safeClients.length === 0 ? (
+        <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)]">
+          <CardContent className="p-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Users className="h-6 w-6" />
+            </div>
+            <p className="mt-3 text-foreground font-medium">Nenhum cliente cadastrado</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Cadastre um cliente para organizar processos, faturamento e documentos.
+            </p>
+            <Button onClick={() => navigate("/clientes/novo")} className="mt-4">
+              <Plus className="h-4 w-4" />
+              Novo Cliente
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)] overflow-hidden">
+          <CardContent className="p-0">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="p-3">Cliente</th>
+                  <th className="p-3">Tipo</th>
+                  <th className="p-3">CPF/CNPJ</th>
+                  <th className="p-3">Cidade/UF</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3">Criado em</th>
+                  <th className="p-3 text-right">Ação</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+
+              <tbody>
+                {safeClients.map((client: Client, index: number) => {
+                  const document = client.cpf_cnpj || "—";
+                  const location =
+                    [client.city, client.state].filter(Boolean).join(" / ") || "—";
+                  const isActive = client.active !== false;
+
+                  return (
+                    <tr key={client.id} className={`border-t border-border/60 ${index % 2 === 1 ? "bg-muted/30" : ""}`}>
+                      <td className="p-3">
+                        <div>
+                          <p className="font-medium text-foreground">{client.name}</p>
+                          {client.trade_name && (
+                            <p className="text-xs text-muted-foreground">
+                              {client.trade_name}
+                            </p>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-3 text-muted-foreground">
+                        <Badge variant="info">{client.type ?? "PJ"}</Badge>
+                      </td>
+                      <td className="p-3 text-muted-foreground">{document}</td>
+                      <td className="p-3 text-muted-foreground">{location}</td>
+                      <td className="p-3">
+                        <Badge variant={isActive ? "success" : "destructive"}>
+                          {isActive ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </td>
+                      <td className="p-3 text-muted-foreground">
+                        {new Date(client.created_at).toLocaleDateString("pt-BR")}
+                      </td>
+                      <td className="p-3 text-right">
+                        <Button
+                          variant="ghost"
+                          onClick={() => navigate(`/clientes/${client.id}`)}
+                          className="text-primary hover:text-primary/80"
+                        >
+                          Detalhes
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

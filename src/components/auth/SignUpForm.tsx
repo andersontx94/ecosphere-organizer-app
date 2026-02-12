@@ -41,13 +41,22 @@ export function SignUpForm() {
 
     setLoading(true);
 
-    const { error } = await signUp(email, password, name);
+    const { error, needsEmailConfirmation } = await signUp(
+      email,
+      password,
+      name
+    );
 
     if (error) {
       toast({
         variant: 'destructive',
         title: 'Erro ao criar conta',
         description: error.message,
+      });
+    } else if (needsEmailConfirmation) {
+      toast({
+        title: 'Verifique seu email',
+        description: 'Enviamos um link de confirmacao para ativar sua conta.',
       });
     } else {
       toast({

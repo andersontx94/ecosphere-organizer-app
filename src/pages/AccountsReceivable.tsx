@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../supabase'
+﻿import { useEffect, useState } from 'react'
+import { supabase } from "@/lib/supabase"
+import { useOrganization } from "@/contexts/OrganizationContext"
 
 type AccountReceivable = {
   id: string
@@ -11,12 +12,20 @@ type AccountReceivable = {
 export default function AccountsReceivable() {
   const [data, setData] = useState<AccountReceivable[]>([])
   const [loading, setLoading] = useState(true)
+  const { activeOrganization } = useOrganization()
 
   useEffect(() => {
     async function fetchData() {
+      if (!activeOrganization) {
+        setData([])
+        setLoading(false)
+        return
+      }
+
       const { data, error } = await supabase
         .from('accounts_receivable')
         .select('*')
+        .eq('organization_id', activeOrganization.id)
 
       if (!error && data) {
         setData(data)
@@ -26,7 +35,7 @@ export default function AccountsReceivable() {
     }
 
     fetchData()
-  }, [])
+  }, [activeOrganization])
 
   if (loading) {
     return <p>Carregando...</p>

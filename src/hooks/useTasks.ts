@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type Task = Database['public']['Tables']['tasks']['Row'];
@@ -13,36 +13,36 @@ export interface TaskWithRelations extends Task {
 }
 
 export function useTasks() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['tasks', user?.id],
+    queryKey: ['tasks', activeOrganization?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!activeOrganization) return [];
       const { data, error } = await supabase
         .from('tasks')
         .select('*, clients(name), enterprises(name)')
-        .eq('user_id', user.id)
+        .eq('organization_id', activeOrganization.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as TaskWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function usePendingTasks() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['tasks', 'pending', user?.id],
+    queryKey: ['tasks', 'pending', activeOrganization?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!activeOrganization) return [];
       const { data, error } = await supabase
         .from('tasks')
         .select('*, clients(name), enterprises(name)')
-        .eq('user_id', user.id)
+        .eq('organization_id', activeOrganization.id)
         .neq('status', 'concluido')
         .order('due_date', { ascending: true, nullsFirst: false })
         .order('priority', { ascending: false });
@@ -50,41 +50,41 @@ export function usePendingTasks() {
       if (error) throw error;
       return data as TaskWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useTask(id: string | undefined) {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
     queryKey: ['tasks', id],
     queryFn: async () => {
-      if (!id || !user) return null;
+      if (!id || !activeOrganization) return null;
       const { data, error } = await supabase
         .from('tasks')
         .select('*, clients(name), enterprises(name)')
         .eq('id', id)
-        .eq('user_id', user.id)
+        .eq('organization_id', activeOrganization.id)
         .single();
       
       if (error) throw error;
       return data as TaskWithRelations;
     },
-    enabled: !!id && !!user,
+    enabled: !!id && !!activeOrganization,
   });
 }
 
 export function useCreateTask() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (data: Omit<TaskInsert, 'user_id'>) => {
-      if (!user) throw new Error('User not authenticated');
+    mutationFn: async (data: Omit<TaskInsert, 'user_id' | 'organization_id'>) => {
+      if (!activeOrganization) throw new Error('Organization not selected');
       const { data: task, error } = await supabase
         .from('tasks')
-        .insert({ ...data, user_id: user.id })
+        .insert({ ...data, organization_id: activeOrganization.id })
         .select()
         .single();
       
@@ -135,3 +135,4 @@ export function useDeleteTask() {
     },
   });
 }
+

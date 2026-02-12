@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+﻿import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 export interface ProcessStage {
   id: string;
@@ -16,31 +17,35 @@ export interface ProcessStage {
 }
 
 export function useProcessStages(processId: string | undefined) {
+  const { activeOrganization } = useOrganization();
   return useQuery({
-    queryKey: ['process_stages', processId],
+    queryKey: ['process_stages', activeOrganization?.id, processId],
     queryFn: async () => {
-      if (!processId) return [];
+      if (!processId || !activeOrganization) return [];
       const { data, error } = await supabase
         .from('process_stages')
         .select('*')
         .eq('process_id', processId)
+        .eq('organization_id', activeOrganization.id)
         .order('order_index');
       
       if (error) throw error;
       return data as ProcessStage[];
     },
-    enabled: !!processId,
+    enabled: !!processId && !!activeOrganization,
   });
 }
 
 export function useCreateProcessStage() {
   const queryClient = useQueryClient();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
     mutationFn: async (data: Omit<ProcessStage, 'id' | 'created_at' | 'updated_at'>) => {
+      if (!activeOrganization) throw new Error('Organization not selected');
       const { data: stage, error } = await supabase
         .from('process_stages')
-        .insert(data)
+        .insert({ ...data, organization_id: activeOrganization.id })
         .select()
         .single();
       
@@ -101,3 +106,5 @@ export const DEFAULT_LICENSING_STAGES = [
   { name: 'Aprovação', order_index: 4 },
   { name: 'Emissão da Licença', order_index: 5 },
 ];
+
+

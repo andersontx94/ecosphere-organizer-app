@@ -1,102 +1,151 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from "@/contexts/OrganizationContext";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Building2, Plus } from "lucide-react";
+import PageHeader from "@/components/layout/PageHeader";
 
-type Enterprise = {
+type EnterpriseRow = {
   id: string;
   name: string;
   client_id: string;
   created_at: string;
+  city: string | null;
+  state: string | null;
+  activity: string | null;
+  clients?: { name: string | null } | null;
 };
 
 export default function Enterprises() {
   const navigate = useNavigate();
+  const { activeOrganization } = useOrganization();
 
-  const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
+  const [enterprises, setEnterprises] = useState<EnterpriseRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEnterprises();
-  }, []);
+  }, [activeOrganization]);
 
   async function fetchEnterprises() {
+    if (!activeOrganization) {
+      setEnterprises([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
 
     const { data, error } = await supabase
       .from("enterprises")
-      .select("id, name, client_id, created_at")
+      .select("id, name, client_id, created_at, city, state, activity, clients(name)")
+      .eq("organization_id", activeOrganization.id)
       .order("name");
 
-    if (!error) {
-      setEnterprises(data || []);
+    if (error) {
+      setError(error.message);
+      setEnterprises([]);
+    } else {
+      setEnterprises((data as EnterpriseRow[]) || []);
     }
 
     setLoading(false);
   }
 
   if (loading) {
-    return <p className="p-6 text-gray-500">Carregando empresas...</p>;
+    return <p className="p-6 text-muted-foreground">Carregando empreendimentos...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <p className="text-destructive font-medium">Erro ao carregar empreendimentos.</p>
+        <p className="text-sm text-destructive/80">Detalhe: {error}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Empresas</h1>
-
-        <button
-          onClick={() => navigate("/empresas/nova")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm"
-        >
-          + Nova Empresa
-        </button>
-      </div>
+    <div className="p-6 space-y-4">
+      <PageHeader
+        title="Empreendimentos"
+        description="Unidades e empresas vinculadas aos clientes."
+        action={
+          <Button onClick={() => navigate("/empresas/nova")}>
+            <Plus className="h-4 w-4" />
+            Novo empreendimento
+          </Button>
+        }
+      />
 
       {enterprises.length === 0 ? (
-        <p className="text-gray-500 text-sm">
-          Nenhuma empresa cadastrada.
-        </p>
+        <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)]">
+          <CardContent className="p-6 text-center space-y-2">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <Building2 className="h-6 w-6" />
+            </div>
+            <p className="text-foreground font-medium">Nenhum empreendimento cadastrado</p>
+            <p className="text-sm text-muted-foreground">
+              Cadastre o primeiro empreendimento para vincular processos.
+            </p>
+            <Button onClick={() => navigate("/empresas/nova")}>
+              <Plus className="h-4 w-4" />
+              Criar empreendimento
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="bg-white border rounded-lg overflow-hidden">
+        <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)] overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600">
+            <thead className="bg-muted/60 text-muted-foreground text-xs uppercase tracking-wide">
               <tr>
-                <th className="text-left px-4 py-3">Empresa</th>
-                <th className="text-left px-4 py-3">Criada em</th>
+                <th className="text-left px-4 py-3">Empreendimento</th>
+                <th className="text-left px-4 py-3">Cliente</th>
+                <th className="text-left px-4 py-3">Cidade/UF</th>
+                <th className="text-left px-4 py-3">Atividade</th>
+                <th className="text-left px-4 py-3">Criado em</th>
                 <th className="text-right px-4 py-3">Ação</th>
               </tr>
             </thead>
 
             <tbody>
-              {enterprises.map((enterprise) => (
-                <tr
-                  key={enterprise.id}
-                  className="border-t hover:bg-gray-50"
-                >
-                  <td className="px-4 py-3 font-medium">
+              {enterprises.map((enterprise, index) => (
+                <tr key={enterprise.id} className={`border-t border-border/60 ${index % 2 === 1 ? "bg-muted/30" : ""}`}>
+                  <td className="px-4 py-3 font-medium text-foreground">
                     {enterprise.name}
                   </td>
-
-                  <td className="px-4 py-3 text-gray-500">
-                    {new Date(
-                      enterprise.created_at
-                    ).toLocaleDateString()}
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {enterprise.clients?.name ?? "—"}
                   </td>
-
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {[enterprise.city, enterprise.state].filter(Boolean).join(" / ") ||
+                      "—"}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {enterprise.activity ? <Badge variant="secondary">{enterprise.activity}</Badge> : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {new Date(enterprise.created_at).toLocaleDateString("pt-BR")}
+                  </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() =>
-                        navigate(`/empresas/${enterprise.id}`)
-                      }
-                      className="text-blue-600 hover:underline"
+                    <Button
+                      variant="ghost"
+                      onClick={() => navigate(`/empresas/${enterprise.id}`)}
+                      className="text-primary hover:text-primary/80"
                     >
-                      Detalhes →
-                    </button>
+                      Detalhes
+                    </Button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
     </div>
   );

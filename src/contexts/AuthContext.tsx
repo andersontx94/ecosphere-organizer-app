@@ -1,16 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from "@/lib/supabase";
 import type { Database } from '@/integrations/supabase/types';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+type Profile = Database['public']['Tables']['profiles']['Row'] & {
+  active_organization_id?: string | null;
+};
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<{ error: Error | null; needsEmailConfirmation: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<Profile>) => Promise<{ error: Error | null }>;
@@ -82,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -90,7 +96,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: { name },
       },
     });
-    return { error };
+    const needsEmailConfirmation = !data.session;
+    return { error, needsEmailConfirmation };
   };
 
   const signIn = async (email: string, password: string) => {

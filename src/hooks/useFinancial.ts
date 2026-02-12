@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type AccountReceivable = Database['public']['Tables']['accounts_receivable']['Row'];
@@ -27,53 +27,53 @@ export interface AccountPayableWithRelations extends AccountPayable {
 // ==================== ACCOUNTS RECEIVABLE ====================
 
 export function useAccountsReceivable() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['accounts-receivable', user?.id],
+    queryKey: ['accounts-receivable', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('accounts_receivable')
         .select('*, clients(name), projects(name)')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .order('due_date', { ascending: true });
 
       if (error) throw error;
       return data as AccountReceivableWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function usePendingReceivables() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['accounts-receivable', 'pending', user?.id],
+    queryKey: ['accounts-receivable', 'pending', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('accounts_receivable')
         .select('*, clients(name), projects(name)')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .eq('status', 'em_aberto')
         .order('due_date', { ascending: true });
 
       if (error) throw error;
       return data as AccountReceivableWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useCreateAccountReceivable() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (data: Omit<AccountReceivableInsert, 'user_id'>) => {
+    mutationFn: async (data: Omit<AccountReceivableInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('accounts_receivable')
-        .insert({ ...data, user_id: user!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id })
         .select()
         .single();
 
@@ -130,53 +130,53 @@ export function useDeleteAccountReceivable() {
 // ==================== ACCOUNTS PAYABLE ====================
 
 export function useAccountsPayable() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['accounts-payable', user?.id],
+    queryKey: ['accounts-payable', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('accounts_payable')
         .select('*, clients(name), projects(name)')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .order('due_date', { ascending: true });
 
       if (error) throw error;
       return data as AccountPayableWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function usePendingPayables() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['accounts-payable', 'pending', user?.id],
+    queryKey: ['accounts-payable', 'pending', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('accounts_payable')
         .select('*, clients(name), projects(name)')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .eq('status', 'em_aberto')
         .order('due_date', { ascending: true });
 
       if (error) throw error;
       return data as AccountPayableWithRelations[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useCreateAccountPayable() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (data: Omit<AccountPayableInsert, 'user_id'>) => {
+    mutationFn: async (data: Omit<AccountPayableInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('accounts_payable')
-        .insert({ ...data, user_id: user!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id })
         .select()
         .single();
 
@@ -233,33 +233,33 @@ export function useDeleteAccountPayable() {
 // ==================== FINANCIAL ACCOUNTS ====================
 
 export function useFinancialAccounts() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['financial-accounts', user?.id],
+    queryKey: ['financial-accounts', activeOrganization?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('financial_accounts')
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('organization_id', activeOrganization!.id)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
       return data as FinancialAccount[];
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
 export function useCreateFinancialAccount() {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useMutation({
-    mutationFn: async (data: Omit<FinancialAccountInsert, 'user_id'>) => {
+    mutationFn: async (data: Omit<FinancialAccountInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('financial_accounts')
-        .insert({ ...data, user_id: user!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id })
         .select()
         .single();
 
@@ -284,12 +284,12 @@ export interface FinancialSummary {
 }
 
 export function useFinancialSummary(startDate?: string, endDate?: string) {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
     queryKey: ['financial-summary', user?.id, startDate, endDate],
     queryFn: async (): Promise<FinancialSummary> => {
-      if (!user) {
+      if (!activeOrganization) {
         return {
           totalReceived: 0,
           totalPaid: 0,
@@ -309,7 +309,7 @@ export function useFinancialSummary(startDate?: string, endDate?: string) {
         supabase
           .from('accounts_receivable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'recebido')
           .gte('received_at', firstDayOfMonth)
           .lte('received_at', lastDayOfMonth),
@@ -317,7 +317,7 @@ export function useFinancialSummary(startDate?: string, endDate?: string) {
         supabase
           .from('accounts_payable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'pago')
           .gte('paid_at', firstDayOfMonth)
           .lte('paid_at', lastDayOfMonth),
@@ -325,13 +325,13 @@ export function useFinancialSummary(startDate?: string, endDate?: string) {
         supabase
           .from('accounts_receivable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'em_aberto'),
         // Pending payables
         supabase
           .from('accounts_payable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'em_aberto'),
       ]);
 
@@ -345,12 +345,12 @@ export function useFinancialSummary(startDate?: string, endDate?: string) {
         supabase
           .from('accounts_receivable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'recebido'),
         supabase
           .from('accounts_payable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'pago'),
       ]);
 
@@ -366,7 +366,7 @@ export function useFinancialSummary(startDate?: string, endDate?: string) {
         monthlyResult: totalReceived - totalPaid,
       };
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
 
@@ -379,3 +379,4 @@ export const EXPENSE_CATEGORIES = [
   { value: 'imposto', label: 'Imposto' },
   { value: 'outros', label: 'Outros' },
 ];
+

@@ -425,6 +425,7 @@ export type Database = {
           owner_id: string | null
           organization_id: string | null
           process_number: string | null
+          process_type_id: string | null
           process_type: string
           protocol_date: string | null
           protocol_number: string | null
@@ -453,6 +454,7 @@ export type Database = {
           owner_id?: string | null
           organization_id?: string | null
           process_number?: string | null
+          process_type_id?: string | null
           process_type: string
           protocol_date?: string | null
           protocol_number?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           owner_id?: string | null
           organization_id?: string | null
           process_number?: string | null
+          process_type_id?: string | null
           process_type?: string
           protocol_date?: string | null
           protocol_number?: string | null
@@ -852,33 +855,54 @@ export type Database = {
       }
       process_types: {
         Row: {
+          active: boolean | null
+          category: string | null
+          code: string | null
           created_at: string
+          created_by: string | null
+          default_deadline_days: number | null
           description: string | null
           id: string
           is_default: boolean | null
           is_licensing: boolean | null
           name: string
           organization_id: string | null
+          requires_agency: boolean | null
+          requires_protocol_number: boolean | null
           user_id: string | null
         }
         Insert: {
+          active?: boolean | null
+          category?: string | null
+          code?: string | null
           created_at?: string
+          created_by?: string | null
+          default_deadline_days?: number | null
           description?: string | null
           id?: string
           is_default?: boolean | null
           is_licensing?: boolean | null
           name: string
           organization_id?: string | null
+          requires_agency?: boolean | null
+          requires_protocol_number?: boolean | null
           user_id?: string | null
         }
         Update: {
+          active?: boolean | null
+          category?: string | null
+          code?: string | null
           created_at?: string
+          created_by?: string | null
+          default_deadline_days?: number | null
           description?: string | null
           id?: string
           is_default?: boolean | null
           is_licensing?: boolean | null
           name?: string
           organization_id?: string | null
+          requires_agency?: boolean | null
+          requires_protocol_number?: boolean | null
           user_id?: string | null
         }
         Relationships: []
@@ -1325,6 +1349,155 @@ export type Database = {
           },
         ]
       }
+      proposals: {
+        Row: {
+          id: string
+          organization_id: string
+          status: string
+          title: string
+          company_name: string
+          contact_name: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          cpf_cnpj: string | null
+          city: string | null
+          state: string | null
+          notes: string | null
+          total_amount: number | null
+          created_at: string
+          updated_at: string
+          converted_at: string | null
+          converted_client_id: string | null
+          converted_enterprise_id: string | null
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          status?: string
+          title: string
+          company_name: string
+          contact_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          cpf_cnpj?: string | null
+          city?: string | null
+          state?: string | null
+          notes?: string | null
+          total_amount?: number | null
+          created_at?: string
+          updated_at?: string
+          converted_at?: string | null
+          converted_client_id?: string | null
+          converted_enterprise_id?: string | null
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          status?: string
+          title?: string
+          company_name?: string
+          contact_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          cpf_cnpj?: string | null
+          city?: string | null
+          state?: string | null
+          notes?: string | null
+          total_amount?: number | null
+          created_at?: string
+          updated_at?: string
+          converted_at?: string | null
+          converted_client_id?: string | null
+          converted_enterprise_id?: string | null
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_converted_client_id_fkey"
+            columns: ["converted_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_converted_enterprise_id_fkey"
+            columns: ["converted_enterprise_id"]
+            isOneToOne: false
+            referencedRelation: "enterprises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_items: {
+        Row: {
+          id: string
+          proposal_id: string
+          organization_id: string
+          service_id: string | null
+          name: string
+          description: string | null
+          quantity: number
+          unit_price: number
+          total_price: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          proposal_id: string
+          organization_id: string
+          service_id?: string | null
+          name: string
+          description?: string | null
+          quantity?: number
+          unit_price?: number
+          total_price?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          proposal_id?: string
+          organization_id?: string
+          service_id?: string | null
+          name?: string
+          description?: string | null
+          quantity?: number
+          unit_price?: number
+          total_price?: number | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_items_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           id: string
@@ -1625,6 +1798,10 @@ export type Database = {
     }
     Functions: {
       is_account_active: { Args: { _user_id: string }; Returns: boolean }
+      convert_proposal: {
+        Args: { proposal_id: string; options?: Json }
+        Returns: Json
+      }
     }
     Enums: {
       account_status: "active" | "inactive"

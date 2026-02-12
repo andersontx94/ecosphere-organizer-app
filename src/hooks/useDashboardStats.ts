@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from '@/contexts/OrganizationContext';
 
 export interface DashboardStats {
   totalClients: number;
@@ -12,12 +12,12 @@ export interface DashboardStats {
 }
 
 export function useDashboardStats() {
-  const { user } = useAuth();
+  const { activeOrganization } = useOrganization();
 
   return useQuery({
-    queryKey: ['dashboard-stats', user?.id],
+    queryKey: ['dashboard-stats', activeOrganization?.id],
     queryFn: async (): Promise<DashboardStats> => {
-      if (!user) {
+      if (!activeOrganization) {
         return {
           totalClients: 0,
           totalEnterprises: 0,
@@ -44,31 +44,31 @@ export function useDashboardStats() {
         supabase
           .from('clients')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id),
+          .eq('organization_id', activeOrganization.id),
         supabase
           .from('enterprises')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id),
+          .eq('organization_id', activeOrganization.id),
         supabase
           .from('documents')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id),
+          .eq('organization_id', activeOrganization.id),
         supabase
           .from('tasks')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .neq('status', 'concluido'),
         supabase
           .from('accounts_receivable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'recebido')
           .gte('received_at', firstDayOfMonth.toISOString())
           .lte('received_at', lastDayOfMonth.toISOString()),
         supabase
           .from('accounts_payable')
           .select('amount')
-          .eq('user_id', user.id)
+          .eq('organization_id', activeOrganization.id)
           .eq('status', 'pago')
           .gte('paid_at', firstDayOfMonth.toISOString())
           .lte('paid_at', lastDayOfMonth.toISOString()),
@@ -93,6 +93,7 @@ export function useDashboardStats() {
         paidThisMonth,
       };
     },
-    enabled: !!user,
+    enabled: !!activeOrganization,
   });
 }
+

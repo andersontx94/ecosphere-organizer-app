@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../lib/supabase";
+﻿import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 type Task = {
   id: string;
@@ -7,7 +8,7 @@ type Task = {
   title: string;
   description: string | null;
   due_date: string | null;
-  done: boolean;
+  status: string | null;
   created_at: string;
 };
 
@@ -15,38 +16,34 @@ type Props = {
   processId: string;
 };
 
+const STATUS_OPTIONS = ["Aberta", "Em progresso", "Concluída"];
+
 export default function ProcessTasks({ processId }: Props) {
+  const { activeOrganization } = useOrganization();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const [showDone, setShowDone] = useState(true);
-
-  // form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
 
   const pendingCount = useMemo(
-    () => tasks.filter((t) => !t.done).length,
+    () => tasks.filter((t) => t.status !== "Concluída").length,
     [tasks]
   );
 
-  const visibleTasks = useMemo(() => {
-    return tasks.filter((t) => (showDone ? true : !t.done));
-  }, [tasks, showDone]);
-
   async function loadTasks() {
+    if (!activeOrganization) return;
     setError("");
     setLoading(true);
 
     const { data, error } = await supabase
       .from("tasks")
-      .select("*")
+      .select("id, process_id, title, description, due_date, status, created_at")
       .eq("process_id", processId)
-      .order("done", { ascending: true })
-      .order("due_date", { ascending: true, nullsFirst: false })
+      .eq("organization_id", activeOrganization.id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -63,9 +60,10 @@ export default function ProcessTasks({ processId }: Props) {
   useEffect(() => {
     loadTasks();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [processId]);
+  }, [processId, activeOrganization?.id]);
 
   async function handleAddTask() {
+    if (!activeOrganization) return;
     setError("");
 
     if (!title.trim()) {
@@ -81,11 +79,12 @@ export default function ProcessTasks({ processId }: Props) {
 
     const { error } = await supabase.from("tasks").insert([
       {
+        organization_id: activeOrganization.id,
         process_id: processId,
         title: title.trim(),
         description: description.trim() ? description.trim() : null,
         due_date: formattedDate,
-        done: false,
+        status: "Aberta",
       },
     ]);
 
@@ -104,13 +103,15 @@ export default function ProcessTasks({ processId }: Props) {
     setSaving(false);
   }
 
-  async function toggleDone(task: Task) {
+  async function updateStatus(task: Task, status: string) {
+    if (!activeOrganization) return;
     setError("");
 
     const { error } = await supabase
       .from("tasks")
-      .update({ done: !task.done })
-      .eq("id", task.id);
+      .update({ status })
+      .eq("id", task.id)
+      .eq("organization_id", activeOrganization.id);
 
     if (error) {
       console.error(error);
@@ -119,17 +120,22 @@ export default function ProcessTasks({ processId }: Props) {
     }
 
     setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, done: !t.done } : t))
+      prev.map((t) => (t.id === task.id ? { ...t, status } : t))
     );
   }
 
   async function deleteTask(taskId: string) {
+    if (!activeOrganization) return;
     setError("");
 
     const ok = window.confirm("Deseja excluir esta tarefa?");
     if (!ok) return;
 
-    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", taskId)
+      .eq("organization_id", activeOrganization.id);
 
     if (error) {
       console.error(error);
@@ -150,21 +156,18 @@ export default function ProcessTasks({ processId }: Props) {
           </p>
         </div>
 
-        <label className="text-sm flex items-center gap-2 select-none">
-          <input
-            type="checkbox"
-            checked={showDone}
-            onChange={(e) => setShowDone(e.target.checked)}
-          />
-          Mostrar concluídas
-        </label>
+        <button
+          onClick={loadTasks}
+          className="border px-3 py-2 rounded-lg hover:bg-gray-50 text-sm"
+        >
+          Recarregar
+        </button>
       </div>
 
-      {/* Form */}
       <div className="grid gap-2">
         <input
           className="w-full border rounded-lg px-3 py-2"
-          placeholder="Título da tarefa (ex: Emitir boleto TCFA)"
+          placeholder="Título da tarefa (ex: Emitir licença)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -192,52 +195,29 @@ export default function ProcessTasks({ processId }: Props) {
           >
             {saving ? "Adicionando..." : "Adicionar"}
           </button>
-
-          <button
-            onClick={loadTasks}
-            className="border px-4 py-2 rounded-lg hover:bg-gray-50"
-          >
-            Recarregar
-          </button>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
       </div>
 
-      {/* Lista */}
       {loading ? (
         <p className="text-gray-500">Carregando tarefas...</p>
-      ) : visibleTasks.length === 0 ? (
+      ) : tasks.length === 0 ? (
         <p className="text-gray-500">Nenhuma tarefa encontrada.</p>
       ) : (
         <div className="space-y-2">
-          {visibleTasks.map((t) => (
+          {tasks.map((t) => (
             <div
               key={t.id}
               className="border rounded-lg p-3 flex items-start justify-between gap-3"
             >
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={t.done}
-                    onChange={() => toggleDone(t)}
-                  />
-                  <p
-                    className={`font-medium break-words ${
-                      t.done ? "line-through text-gray-400" : ""
-                    }`}
-                  >
-                    {t.title}
-                  </p>
-                </div>
-
+                <p className="font-medium">{t.title}</p>
                 {t.description && (
                   <p className="text-sm text-gray-600 mt-1 break-words">
                     {t.description}
                   </p>
                 )}
-
                 <p className="text-xs text-gray-500 mt-2">
                   Prazo:{" "}
                   {t.due_date
@@ -246,12 +226,25 @@ export default function ProcessTasks({ processId }: Props) {
                 </p>
               </div>
 
-              <button
-                onClick={() => deleteTask(t.id)}
-                className="text-sm text-red-600 hover:text-red-700"
-              >
-                Excluir
-              </button>
+              <div className="flex flex-col gap-2 items-end">
+                <select
+                  className="border rounded px-2 py-1 text-sm"
+                  value={t.status ?? "Aberta"}
+                  onChange={(e) => updateStatus(t, e.target.value)}
+                >
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => deleteTask(t.id)}
+                  className="text-sm text-red-600 hover:text-red-700"
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -259,3 +252,4 @@ export default function ProcessTasks({ processId }: Props) {
     </div>
   );
 }
+
