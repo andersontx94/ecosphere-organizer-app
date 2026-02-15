@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import { Toaster } from "@/components/ui/toaster";
 import { runSupabaseHealthCheck } from "@/lib/supabaseHealth";
+import AppErrorBoundary from "@/components/app/AppErrorBoundary";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
@@ -30,12 +31,14 @@ if (import.meta.env.DEV) {
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <OrganizationProvider>
-          <App />
-          <Toaster />
-        </OrganizationProvider>
-      </AuthProvider>
+      <AppErrorBoundary>
+        <AuthProvider>
+          <OrganizationProvider>
+            <App />
+            <Toaster />
+          </OrganizationProvider>
+        </AuthProvider>
+      </AppErrorBoundary>
     </QueryClientProvider>
   </StrictMode>
 );
