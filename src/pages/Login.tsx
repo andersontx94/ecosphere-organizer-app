@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, supabaseConfigError } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import {
 import { Leaf, Loader2, Lock, Mail } from "lucide-react";
 
 export default function Login() {
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,7 +45,7 @@ export default function Login() {
 
     if (error) {
       const message = error.message ?? "Erro ao entrar.";
-      if (message.toLowerCase().includes("email not confirmed")) {
+      if (message.toLowerCase().includes("confirm")) {
         setNeedsConfirmation(true);
         setError(
           "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada ou clique abaixo para reenviar."
@@ -61,6 +61,10 @@ export default function Login() {
 
   async function handleResendConfirmation() {
     if (resendLoading) return;
+    if (!isSupabaseConfigured) {
+      setResendMessage(supabaseConfigError ?? "Supabase nao configurado.");
+      return;
+    }
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
       setResendMessage("Informe seu e-mail acima para reenviar a confirmação.");
@@ -73,6 +77,9 @@ export default function Login() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email: trimmedEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
 
     setResendLoading(false);
@@ -94,6 +101,47 @@ export default function Login() {
 
   if (user) {
     return <Navigate to={from} replace />;
+  }
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-green-100 p-4">
+        <Card className="w-full max-w-md shadow-card border-border text-center">
+          <CardHeader>
+            <CardTitle className="font-display text-2xl">
+              Configuracao incompleta
+            </CardTitle>
+            <CardDescription>
+              {supabaseConfigError ??
+                "As credenciais do Supabase nao estao configuradas."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Verifique as variaveis de ambiente no Vercel e tente novamente.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-green-100 p-4">
+        <Card className="w-full max-w-md shadow-card border-border text-center">
+          <CardHeader>
+            <CardTitle className="font-display text-2xl">
+              Carregando...
+            </CardTitle>
+            <CardDescription>Verificando sua sessao.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-600" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -211,3 +259,4 @@ export default function Login() {
     </div>
   );
 }
+

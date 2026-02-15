@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { isSupabaseConfigured, supabaseConfigError } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,7 @@ import {
 import { CheckCircle, Leaf, Loader2, Lock, Mail, User } from "lucide-react";
 
 export default function Signup() {
-  const { signUp, user } = useAuth();
+  const { signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -57,6 +58,47 @@ export default function Signup() {
     return <Navigate to="/" replace />;
   }
 
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-green-100 p-4">
+        <Card className="w-full max-w-md shadow-card border-border text-center">
+          <CardHeader>
+            <CardTitle className="font-display text-2xl">
+              Configuracao incompleta
+            </CardTitle>
+            <CardDescription>
+              {supabaseConfigError ??
+                "As credenciais do Supabase nao estao configuradas."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Verifique as variaveis de ambiente no Vercel e tente novamente.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-green-100 p-4">
+        <Card className="w-full max-w-md shadow-card border-border text-center">
+          <CardHeader>
+            <CardTitle className="font-display text-2xl">
+              Carregando...
+            </CardTitle>
+            <CardDescription>Verificando sua sessao.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-emerald-600" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (confirmationSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-green-100 p-4">
@@ -83,13 +125,14 @@ export default function Signup() {
                 Verifique seu email
               </CardTitle>
               <CardDescription>
-                Enviamos um link de confirmacao para{" "}
-                <strong>{confirmationEmail}</strong>
+                Conta criada. Verifique seu e-mail para confirmar o acesso.
+                Se nao chegar, confira o spam.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Assim que confirmar, voce podera entrar no sistema.
+                Enviamos um link de confirmacao para{" "}
+                <strong>{confirmationEmail}</strong>.
               </p>
             </CardContent>
             <CardFooter className="flex justify-center">
