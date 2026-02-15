@@ -1,6 +1,11 @@
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export async function runSupabaseHealthCheck() {
+  if (!isSupabaseConfigured) {
+    console.warn("[supabase] health check skipped: missing env config");
+    return;
+  }
+
   try {
     const sessionResult = await supabase.auth.getSession();
     console.info("[supabase] getSession", {

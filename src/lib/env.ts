@@ -2,6 +2,13 @@ type EnvMap = Record<string, string | undefined>;
 
 const env = import.meta.env as EnvMap;
 
+export type SupabaseEnvStatus = {
+  url: string;
+  anonKey: string;
+  isValid: boolean;
+  missing: string[];
+};
+
 export function getRequiredEnv(key: string): string {
   const value = env[key];
   if (!value) {
@@ -10,17 +17,22 @@ export function getRequiredEnv(key: string): string {
   return value;
 }
 
-export function getSupabaseConfig() {
-  const url = getRequiredEnv("VITE_SUPABASE_URL");
+export function getSupabaseConfig(): SupabaseEnvStatus {
+  const url = env.VITE_SUPABASE_URL ?? "";
   const publishableKey = env.VITE_SUPABASE_PUBLISHABLE_KEY;
   const anonKey = env.VITE_SUPABASE_ANON_KEY;
-  const apiKey = publishableKey ?? anonKey;
+  const apiKey = publishableKey ?? anonKey ?? "";
+  const missing: string[] = [];
 
+  if (!url) missing.push("VITE_SUPABASE_URL");
   if (!apiKey) {
-    throw new Error(
-      "Missing required env var: VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY)"
-    );
+    missing.push("VITE_SUPABASE_PUBLISHABLE_KEY ou VITE_SUPABASE_ANON_KEY");
   }
 
-  return { url, anonKey: apiKey };
+  return {
+    url,
+    anonKey: apiKey,
+    isValid: missing.length === 0,
+    missing,
+  };
 }
