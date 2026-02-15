@@ -1,4 +1,4 @@
-ï»¿import { useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import StatusBadge from "../components/ui/StatusBadge";
@@ -52,6 +52,7 @@ type DocumentRow = {
 type TabKey = "servicos" | "tarefas" | "documentos";
 
 export default function ProcessDetail() {
+  const supabaseAny = supabase as any;
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { activeOrganization } = useOrganization();
@@ -137,7 +138,7 @@ export default function ProcessDetail() {
         (data || [])
           .map((row) => ({
             id: row.service_id,
-            name: row.services?.name ?? "ServiÃ§o",
+            name: row.services?.name ?? "Serviço",
           }))
           .filter((row) => !!row.id) ?? [];
 
@@ -185,7 +186,7 @@ export default function ProcessDetail() {
         .eq("process_id", id)
         .eq("organization_id", activeOrganization.id)
         .order("created_at", { ascending: false });
-      setDocuments((data as DocumentRow[]) || []);
+      setDocuments((data as unknown as DocumentRow[]) || []);
     }
     loadDocuments();
   }, [id, user]);
@@ -215,7 +216,7 @@ export default function ProcessDetail() {
 
     setSavingItem(true);
 
-    const { error } = await supabase.from("process_services").insert([
+    const { error } = await supabaseAny.from("process_services").insert([
       {
         organization_id: activeOrganization.id,
         process_id: id,
@@ -266,14 +267,14 @@ export default function ProcessDetail() {
     setDocError(null);
 
     if (!docTitle.trim() || !docFile) {
-      setDocError("Informe tÃ­tulo e arquivo.");
+      setDocError("Informe título e arquivo.");
       return;
     }
 
     setDocLoading(true);
 
     const path = `${user.id}/${id}/${Date.now()}-${docFile.name}`;
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseAny.storage
       .from("documents")
       .upload(path, docFile);
 
@@ -283,7 +284,7 @@ export default function ProcessDetail() {
       return;
     }
 
-    const { error } = await supabase.from("documents").insert([
+    const { error } = await supabaseAny.from("documents").insert([
       {
         organization_id: activeOrganization.id,
         process_id: id,
@@ -308,7 +309,7 @@ export default function ProcessDetail() {
       .eq("process_id", id)
       .eq("organization_id", activeOrganization.id)
       .order("created_at", { ascending: false });
-    setDocuments((data as DocumentRow[]) || []);
+    setDocuments((data as unknown as DocumentRow[]) || []);
   }
 
   if (loading) {
@@ -316,7 +317,7 @@ export default function ProcessDetail() {
   }
 
   if (notFound || !process) {
-    return <p className="text-red-500">Processo nÃ£o encontrado.</p>;
+    return <p className="text-red-500">Processo não encontrado.</p>;
   }
 
   return (
@@ -325,15 +326,15 @@ export default function ProcessDetail() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold">
-              Processo {process.process_number ?? "â€”"}
+              Processo {process.process_number ?? "—"}
             </h1>
             <p className="text-sm text-gray-500">
-              Cliente: {process.clients?.name ?? "â€”"} â€¢ Empreendimento:{" "}
-              {process.enterprises?.name ?? "â€”"}
+              Cliente: {process.clients?.name ?? "—"} • Empreendimento:{" "}
+              {process.enterprises?.name ?? "—"}
             </p>
             <p className="text-sm text-gray-500">
-              Tipo: {process.process_type ?? "â€”"} â€¢ Ã“rgÃ£o:{" "}
-              {process.agency ?? "â€”"}
+              Tipo: {process.process_type ?? "—"} • Órgão:{" "}
+              {process.agency ?? "—"}
             </p>
           </div>
 
@@ -356,7 +357,7 @@ export default function ProcessDetail() {
         <div className="flex flex-wrap border-b">
           {(
             [
-              ["servicos", "ServiÃ§os do processo"],
+              ["servicos", "Serviços do processo"],
               ["tarefas", "Tarefas"],
               ["documentos", "Documentos"],
             ] as const
@@ -380,13 +381,13 @@ export default function ProcessDetail() {
             <div className="space-y-4">
               <div className="rounded-lg border bg-gray-50 p-3">
                 <div className="text-sm font-medium text-gray-800">
-                  ServiÃ§os vinculados
+                  Serviços vinculados
                 </div>
                 {servicesLoading ? (
                   <p className="text-sm text-gray-500 mt-1">Carregando...</p>
                 ) : linkedServices.length === 0 ? (
                   <p className="text-sm text-gray-500 mt-1">
-                    Nenhum serviÃ§o vinculado.
+                    Nenhum serviço vinculado.
                   </p>
                 ) : (
                   <div className="mt-2 flex flex-wrap gap-2">
@@ -417,7 +418,7 @@ export default function ProcessDetail() {
                     );
                   }}
                 >
-                  <option value="">Selecione um serviÃ§o</option>
+                  <option value="">Selecione um serviço</option>
                   {serviceOptions.map((service) => (
                     <option key={service.id} value={service.id}>
                       {service.name}
@@ -432,7 +433,7 @@ export default function ProcessDetail() {
                 />
                 <input
                   className="border rounded px-3 py-2"
-                  placeholder="PreÃ§o unitÃ¡rio"
+                  placeholder="Preço unitário"
                   value={unitPrice}
                   onChange={(e) => setUnitPrice(e.target.value)}
                 />
@@ -446,14 +447,14 @@ export default function ProcessDetail() {
               </div>
               <input
                 className="border rounded px-3 py-2 w-full"
-                placeholder="ObservaÃ§Ãµes (opcional)"
+                placeholder="Observações (opcional)"
                 value={itemNotes}
                 onChange={(e) => setItemNotes(e.target.value)}
               />
 
               {serviceItems.length === 0 ? (
                 <p className="text-sm text-gray-500">
-                  Nenhum serviÃ§o adicionado ao processo.
+                  Nenhum serviço adicionado ao processo.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -464,10 +465,10 @@ export default function ProcessDetail() {
                     >
                       <div>
                         <p className="font-medium">
-                          {item.services?.name ?? "ServiÃ§o"}
+                          {item.services?.name ?? "Serviço"}
                         </p>
                         <p className="text-xs text-gray-500">
-                          Qtd: {item.qty} â€¢ Unit:{" "}
+                          Qtd: {item.qty} • Unit:{" "}
                           {new Intl.NumberFormat("pt-BR", {
                             style: "currency",
                             currency: "BRL",
@@ -510,7 +511,7 @@ export default function ProcessDetail() {
               <form onSubmit={handleUploadDocument} className="space-y-3">
                 <input
                   className="border rounded px-3 py-2 w-full"
-                  placeholder="TÃ­tulo do documento"
+                  placeholder="Título do documento"
                   value={docTitle}
                   onChange={(e) => setDocTitle(e.target.value)}
                 />
@@ -538,7 +539,7 @@ export default function ProcessDetail() {
                     <div key={doc.id} className="border rounded p-3">
                       <p className="font-medium">{doc.title}</p>
                       <p className="text-xs text-gray-500">
-                        {doc.file_type ?? "Arquivo"} â€¢{" "}
+                        {doc.file_type ?? "Arquivo"} •{" "}
                         {new Date(doc.created_at).toLocaleDateString("pt-BR")}
                       </p>
                     </div>
@@ -552,4 +553,6 @@ export default function ProcessDetail() {
     </div>
   );
 }
+
+
 

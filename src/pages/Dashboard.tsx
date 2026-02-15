@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useOrganization } from "@/contexts/OrganizationContext";
@@ -46,7 +46,7 @@ const EMPTY_STATS: Stats = {
 };
 
 function formatDate(value: string | null) {
-  if (!value) return "â€”";
+  if (!value) return "—";
   return new Date(value).toLocaleDateString("pt-BR");
 }
 
@@ -64,13 +64,14 @@ function dueLabel(dueDate: string | null) {
 
   if (diff < 0) {
     const days = Math.abs(diff);
-    return `Vencido hÃ¡ ${days} dia${days === 1 ? "" : "s"}`;
+    return `Vencido há ${days} dia${days === 1 ? "" : "s"}`;
   }
   if (diff === 0) return "Vence hoje";
   return `Vence em ${diff} dia${diff === 1 ? "" : "s"}`;
 }
 
 export default function Dashboard() {
+  const supabaseAny = supabase as any;
   const { activeOrganization } = useOrganization();
   const [stats, setStats] = useState<Stats>(EMPTY_STATS);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
@@ -98,32 +99,32 @@ export default function Dashboard() {
           dueSoonCount,
           alertsData,
         ] = await Promise.all([
-          supabase
+          supabaseAny
             .from("clients")
             .select("id", { count: "exact", head: true })
             .eq("organization_id", activeOrganization.id),
-          supabase
+          supabaseAny
             .from("enterprises")
             .select("id", { count: "exact", head: true })
             .eq("organization_id", activeOrganization.id),
-          supabase
+          supabaseAny
             .from("environmental_processes")
             .select("id", { count: "exact", head: true })
             .eq("organization_id", activeOrganization.id)
-            .not("status", "in", '("ConcluÃ­do","Concluido","Cancelado")'),
-          supabase
+            .not("status", "in", '("Concluído","Concluido","Cancelado")'),
+          supabaseAny
             .from("tasks")
             .select("id", { count: "exact", head: true })
             .eq("organization_id", activeOrganization.id)
-            .neq("status", "ConcluÃ­da"),
-          supabase
+            .neq("status", "Concluída"),
+          supabaseAny
             .from("environmental_processes")
             .select("id", { count: "exact", head: true })
             .eq("organization_id", activeOrganization.id)
             .gte("due_date", todayStr)
             .lte("due_date", soonStr)
-            .not("status", "in", '("ConcluÃ­do","Concluido","Cancelado")'),
-          supabase
+            .not("status", "in", '("Concluído","Concluido","Cancelado")'),
+          supabaseAny
             .from("environmental_processes")
             .select(
               "id, process_number, process_type, due_date, clients(name), enterprises(name)"
@@ -131,7 +132,7 @@ export default function Dashboard() {
             .eq("organization_id", activeOrganization.id)
             .not("due_date", "is", null)
             .lte("due_date", soonStr)
-            .not("status", "in", '("ConcluÃ­do","Concluido","Cancelado")')
+            .not("status", "in", '("Concluído","Concluido","Cancelado")')
             .order("due_date", { ascending: true })
             .limit(5),
         ]);
@@ -168,7 +169,7 @@ export default function Dashboard() {
           typeof err === "object" && err && "message" in err
             ? (err as { message?: string }).message
             : "Erro desconhecido ao carregar dashboard.";
-        setError(message);
+        setError(message ?? "Erro desconhecido ao carregar dashboard.");
       } finally {
         setLoading(false);
       }
@@ -222,12 +223,12 @@ export default function Dashboard() {
     <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Dashboard"
-        description="VisÃ£o geral da consultoria ambiental"
-        eyebrow="VisÃ£o geral"
+        description="Visão geral da consultoria ambiental"
+        eyebrow="Visão geral"
         action={
           <div className="flex items-center gap-2 text-xs text-primary/80">
             <span className="inline-flex h-2 w-2 rounded-full bg-primary" />
-            AtualizaÃ§Ã£o em tempo real
+            Atualização em tempo real
           </div>
         }
       />
@@ -271,7 +272,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle>Comece em 3 passos</CardTitle>
               <CardDescription>
-                Configure sua operaÃ§Ã£o e jÃ¡ comece a registrar processos.
+                Configure sua operação e já comece a registrar processos.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -293,7 +294,7 @@ export default function Dashboard() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm">2. Crie um empreendimento</CardTitle>
                     <CardDescription>
-                      Relacione unidades e localizaÃ§Ãµes.
+                      Relacione unidades e localizações.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -306,7 +307,7 @@ export default function Dashboard() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm">3. Abra um processo</CardTitle>
                     <CardDescription>
-                      Controle prazos, serviÃ§os e tarefas.
+                      Controle prazos, serviços e tarefas.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -325,7 +326,7 @@ export default function Dashboard() {
           <div>
             <CardTitle>Alertas importantes</CardTitle>
             <CardDescription>
-              {alerts.length} processo(s) com vencimento prÃ³ximo
+              {alerts.length} processo(s) com vencimento próximo
             </CardDescription>
           </div>
         </CardHeader>
@@ -334,7 +335,7 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground">Carregando alertas...</p>
           ) : alerts.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhum processo com vencimento prÃ³ximo.
+              Nenhum processo com vencimento próximo.
             </p>
           ) : (
             <div className="space-y-2">
@@ -345,13 +346,13 @@ export default function Dashboard() {
                 >
                   <div>
                     <p className="font-medium text-foreground">
-                      {alert.process_number ?? "Processo sem nÃºmero"} â€” {alert.process_type ?? "Sem tipo"}
+                      {alert.process_number ?? "Processo sem número"} — {alert.process_type ?? "Sem tipo"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Cliente: {alert.clients?.name ?? "â€”"} â€¢ Empreendimento: {alert.enterprises?.name ?? "â€”"}
+                      Cliente: {alert.clients?.name ?? "—"} • Empreendimento: {alert.enterprises?.name ?? "—"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {dueLabel(alert.due_date)} â€¢ {formatDate(alert.due_date)}
+                      {dueLabel(alert.due_date)} • {formatDate(alert.due_date)}
                     </p>
                   </div>
                   <Link
@@ -369,4 +370,8 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+
+
 

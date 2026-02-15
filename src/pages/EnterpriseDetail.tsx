@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useOrganization } from "@/contexts/OrganizationContext";
@@ -33,6 +33,7 @@ type Process = {
 };
 
 export default function EnterpriseDetail() {
+  const supabaseAny = supabase as any;
   const { id } = useParams<{ id: string }>();
   const { activeOrganization } = useOrganization();
   const navigate = useNavigate();
@@ -82,16 +83,16 @@ export default function EnterpriseDetail() {
       ]);
 
       if (enterpriseError || !enterpriseData) {
-        setError("Empreendimento nÃ£o encontrado.");
+        setError("Empreendimento não encontrado.");
         setEnterprise(null);
-        setClients((clientData as ClientOption[]) || []);
+        setClients((clientData as unknown as ClientOption[]) || []);
         setProcesses((processData as Process[]) || []);
         setLoading(false);
         return;
       }
 
-      setEnterprise(enterpriseData as Enterprise);
-      setClients((clientData as ClientOption[]) || []);
+      setEnterprise(enterpriseData as unknown as Enterprise);
+      setClients((clientData as unknown as ClientOption[]) || []);
       setProcesses((processData as Process[]) || []);
       setLoading(false);
     }
@@ -104,7 +105,7 @@ export default function EnterpriseDetail() {
     if (!enterprise || !activeOrganization) return;
 
     if (!enterprise.name.trim()) {
-      setError("Nome do empreendimento Ã© obrigatÃ³rio.");
+      setError("Nome do empreendimento é obrigatório.");
       return;
     }
 
@@ -173,7 +174,7 @@ export default function EnterpriseDetail() {
   }
 
   if (!enterprise) {
-    return <p className="p-6 text-red-600">{error ?? "NÃ£o encontrado."}</p>;
+    return <p className="p-6 text-red-600">{error ?? "Não encontrado."}</p>;
   }
 
   return (
@@ -248,7 +249,7 @@ export default function EnterpriseDetail() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">EndereÃ§o</label>
+          <label className="block text-sm font-medium mb-1">Endereço</label>
           <input
             type="text"
             value={enterprise.address ?? ""}
@@ -316,7 +317,7 @@ export default function EnterpriseDetail() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">ObservaÃ§Ãµes</label>
+          <label className="block text-sm font-medium mb-1">Observações</label>
           <textarea
             value={enterprise.notes ?? ""}
             onChange={(e) =>
@@ -345,7 +346,7 @@ export default function EnterpriseDetail() {
           disabled={saving}
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-60"
         >
-          {saving ? "Salvando..." : "Salvar alteraÃ§Ãµes"}
+          {saving ? "Salvando..." : "Salvar alterações"}
         </button>
       </form>
 
@@ -374,10 +375,10 @@ export default function EnterpriseDetail() {
               >
                 <div>
                   <p className="font-medium">
-                    {process.process_number ?? "â€”"}
+                    {process.process_number ?? "—"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {process.process_type ?? "â€”"} â€¢ {process.status ?? "â€”"}
+                    {process.process_type ?? "—"} • {process.status ?? "—"}
                   </p>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -393,3 +394,5 @@ export default function EnterpriseDetail() {
     </div>
   );
 }
+
+

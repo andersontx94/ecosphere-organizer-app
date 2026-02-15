@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { isSupabaseConfigured, supabaseConfigError } from "@/lib/supabase";
+import { isSupabaseConfigured, supabaseConfigError, supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import {
 import { CheckCircle, Leaf, Loader2, Lock, Mail, User } from "lucide-react";
 
 export default function Signup() {
-  const { signUp, user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -27,34 +27,53 @@ export default function Signup() {
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [confirmationEmail, setConfirmationEmail] = useState("");
   const showEmailConfigHint =
-    error?.toLowerCase().includes("error sending confirmation email") ?? false;
+    error?.toLowerCase().includes("confirmation email") ?? false;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { error, needsEmailConfirmation } = await signUp(
-      email.trim(),
-      password,
-      name.trim()
-    );
+    const trimmedEmail = email.trim();
+    const trimmedName = name.trim();
+    const redirectTo = `${window.location.origin}/login`;
 
-    setLoading(false);
+    console.info("[auth] signUp origin", window.location.origin);
+    console.info("[auth] signUp redirectTo", redirectTo);
 
-    if (error) {
-      console.error("[auth] signUp error", error);
-      setError(error.message);
-      return;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password,
+        options: {
+          data: { name: trimmedName },
+          emailRedirectTo: redirectTo,
+        },
+      });
+
+      setLoading(false);
+
+      if (error) {
+        console.error("[auth] signUp error", error);
+        setError(error.message);
+        return;
+      }
+
+      const needsEmailConfirmation = !data.session;
+      if (needsEmailConfirmation) {
+        setConfirmationEmail(trimmedEmail);
+        setConfirmationSent(true);
+        return;
+      }
+
+      navigate("/", { replace: true });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Erro ao criar conta.";
+      console.error("[auth] signUp exception", err);
+      setLoading(false);
+      setError(message);
     }
-
-    if (needsEmailConfirmation) {
-      setConfirmationEmail(email.trim());
-      setConfirmationSent(true);
-      return;
-    }
-
-    navigate("/", { replace: true });
   }
 
   if (user) {
@@ -222,8 +241,8 @@ export default function Signup() {
               {error && <p className="text-sm text-red-600">{error}</p>}
               {showEmailConfigHint && (
                 <p className="text-sm text-amber-700">
-                  Possivel falha de SMTP ou URL de redirecionamento. Verifique a
-                  configuracao de e-mail e URLs no Supabase.
+                  Verifique no Supabase: Authentication → URL Configuration
+                  (Site URL + Redirect URLs) e SMTP/Email provider.
                 </p>
               )}
             </CardContent>

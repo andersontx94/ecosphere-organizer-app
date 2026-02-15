@@ -39,21 +39,23 @@ export default function NewClient() {
 
     setLoading(true);
 
-    const { error } = await supabase.from("clients").insert([
-      {
-        organization_id: activeOrganization.id,
-        type,
-        name: name.trim(),
-        trade_name: tradeName.trim() || null,
-        cpf_cnpj: cpfCnpj.trim() || null,
-        phone: phone.trim() || null,
-        city: city.trim() || null,
-        state: state.trim() || null,
-        address: address.trim() || null,
-        notes: notes.trim() || null,
-        active,
-      },
-    ]);
+    const { error } = await supabase.from("clients").insert(
+      [
+        {
+          organization_id: activeOrganization.id,
+          type,
+          name: name.trim(),
+          trade_name: tradeName.trim() || null,
+          cpf_cnpj: cpfCnpj.trim() || null,
+          phone: phone.trim() || null,
+          city: city.trim() || null,
+          state: state.trim() || null,
+          address: address.trim() || null,
+          notes: notes.trim() || null,
+          active,
+        },
+      ] as any
+    );
 
     setLoading(false);
 

@@ -169,8 +169,9 @@ export default function ProposalForm() {
       if (itemsError) {
         setError(itemsError.message);
       } else if (itemsData && itemsData.length > 0) {
+        const rawItems = itemsData as any[];
         setItems(
-          (itemsData as ProposalItem[]).map((item) => ({
+          rawItems.map((item) => ({
             id: item.id,
             service_id: item.service_id,
             name: item.name ?? "",

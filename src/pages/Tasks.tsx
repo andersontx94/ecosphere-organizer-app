@@ -148,16 +148,18 @@ export default function Tasks() {
 
     setSaving(true);
 
-    const { error } = await supabase.from("tasks").insert([
-      {
-        organization_id: activeOrganization.id,
-        process_id: processId,
-        title: title.trim(),
-        description: description.trim() ? description.trim() : null,
-        due_date: dueDate ? dueDate : null,
-        status,
-      },
-    ]);
+    const { error } = await supabase.from("tasks").insert(
+      [
+        {
+          organization_id: activeOrganization.id,
+          process_id: processId,
+          title: title.trim(),
+          description: description.trim() ? description.trim() : null,
+          due_date: dueDate ? dueDate : null,
+          status,
+        },
+      ] as any
+    );
 
     if (error) {
       console.error("Failed to create task:", error);
@@ -180,7 +182,7 @@ export default function Tasks() {
     if (!activeOrganization) return;
     const { error } = await supabase
       .from("tasks")
-      .update({ status: nextStatus })
+      .update({ status: nextStatus as any })
       .eq("id", taskId)
       .eq("organization_id", activeOrganization.id);
 

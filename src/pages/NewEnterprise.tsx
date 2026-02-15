@@ -75,22 +75,24 @@ export default function NewEnterprise() {
 
     setLoading(true);
 
-    const { error } = await supabase.from("enterprises").insert([
-      {
-        name: name.trim(),
-        client_id: clientId,
-        cpf_cnpj: cpfCnpj.trim() || null,
-        activity: activity.trim() || null,
-        address: address.trim() || null,
-        state: state.trim() || null,
-        city: city.trim() || null,
-        lat: latValue,
-        lng: lngValue,
-        notes: notes.trim() || null,
-        active,
-        organization_id: activeOrganization.id,
-      },
-    ]);
+    const { error } = await supabase.from("enterprises").insert(
+      [
+        {
+          name: name.trim(),
+          client_id: clientId,
+          cpf_cnpj: cpfCnpj.trim() || null,
+          activity: activity.trim() || null,
+          address: address.trim() || null,
+          state: state.trim() || null,
+          city: city.trim() || null,
+          lat: latValue,
+          lng: lngValue,
+          notes: notes.trim() || null,
+          active,
+          organization_id: activeOrganization.id,
+        },
+      ] as any
+    );
 
     setLoading(false);
 

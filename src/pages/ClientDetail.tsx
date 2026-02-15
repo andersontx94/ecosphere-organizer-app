@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useOrganization } from "@/contexts/OrganizationContext";
@@ -60,6 +60,7 @@ type TabKey =
   | "financeiro";
 
 export default function ClientDetail() {
+  const supabaseAny = supabase as any;
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { activeOrganization } = useOrganization();
@@ -133,15 +134,15 @@ export default function ClientDetail() {
 
       if (clientError || !clientData) {
         setClient(null);
-        setError("Cliente nÃ£o encontrado.");
+        setError("Cliente não encontrado.");
         setLoading(false);
         return;
       }
 
-      setClient(clientData as Client);
-      setContacts((contactsError ? [] : (contactsData as Contact[])) ?? []);
+      setClient(clientData as unknown as Client);
+      setContacts((contactsError ? [] : (contactsData as unknown as Contact[])) ?? []);
       setEnterprises(
-        (enterprisesError ? [] : (enterprisesData as Enterprise[])) ?? []
+        (enterprisesError ? [] : (enterprisesData as unknown as Enterprise[])) ?? []
       );
       setInvoices((invoicesError ? [] : (invoicesData as Invoice[])) ?? []);
       setLoading(false);
@@ -180,7 +181,7 @@ export default function ClientDetail() {
     if (!client || !activeOrganization) return;
 
     if (!client.name.trim()) {
-      setError("Nome do cliente Ã© obrigatÃ³rio.");
+      setError("Nome do cliente é obrigatório.");
       return;
     }
 
@@ -217,11 +218,11 @@ export default function ClientDetail() {
     if (!activeOrganization || !id) return;
 
     if (!contactForm.name.trim()) {
-      setError("Nome do contato Ã© obrigatÃ³rio.");
+      setError("Nome do contato é obrigatório.");
       return;
     }
 
-    const { error } = await supabase.from("client_contacts").insert([
+    const { error } = await supabaseAny.from("client_contacts").insert([
       {
         organization_id: activeOrganization.id,
         client_id: id,
@@ -279,7 +280,7 @@ export default function ClientDetail() {
   }
 
   if (!client) {
-    return <p className="p-6 text-red-500">{error ?? "Cliente nÃ£o encontrado."}</p>;
+    return <p className="p-6 text-red-500">{error ?? "Cliente não encontrado."}</p>;
   }
 
   return (
@@ -329,8 +330,8 @@ export default function ClientDetail() {
                     }
                     className="w-full border rounded px-3 py-2"
                   >
-                    <option value="PJ">Pessoa JurÃ­dica (PJ)</option>
-                    <option value="PF">Pessoa FÃ­sica (PF)</option>
+                    <option value="PJ">Pessoa Jurídica (PJ)</option>
+                    <option value="PF">Pessoa Física (PF)</option>
                   </select>
                 </div>
 
@@ -390,7 +391,7 @@ export default function ClientDetail() {
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
-                  EndereÃ§o
+                  Endereço
                 </label>
                 <input
                   value={client.address ?? ""}
@@ -430,7 +431,7 @@ export default function ClientDetail() {
 
               <div>
                 <label className="block text-sm text-gray-600 mb-1">
-                  ObservaÃ§Ãµes
+                  Observações
                 </label>
                 <textarea
                   value={client.notes ?? ""}
@@ -460,7 +461,7 @@ export default function ClientDetail() {
                 disabled={saving}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-60"
               >
-                {saving ? "Salvando..." : "Salvar alteraÃ§Ãµes"}
+                {saving ? "Salvando..." : "Salvar alterações"}
               </button>
             </form>
           )}
@@ -479,7 +480,7 @@ export default function ClientDetail() {
                   />
                   <input
                     className="border rounded px-3 py-2"
-                    placeholder="Cargo / FunÃ§Ã£o"
+                    placeholder="Cargo / Função"
                     value={contactForm.role}
                     onChange={(e) =>
                       setContactForm({ ...contactForm, role: e.target.value })
@@ -536,10 +537,10 @@ export default function ClientDetail() {
                     >
                       <div>
                         <p className="font-medium">
-                          {contact.name} {contact.is_primary ? "â€¢ Principal" : ""}
+                          {contact.name} {contact.is_primary ? "• Principal" : ""}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {contact.role ?? "â€”"} â€¢ {contact.email ?? "â€”"} â€¢ {contact.phone ?? "â€”"}
+                          {contact.role ?? "—"} • {contact.email ?? "—"} • {contact.phone ?? "—"}
                         </p>
                       </div>
                       <button
@@ -583,7 +584,7 @@ export default function ClientDetail() {
                       <p className="text-xs text-gray-500">
                         {[enterprise.city, enterprise.state]
                           .filter(Boolean)
-                          .join(" / ") || "Sem localizaÃ§Ã£o"} {enterprise.activity ? `â€¢ ${enterprise.activity}` : ""}
+                          .join(" / ") || "Sem localização"} {enterprise.activity ? `• ${enterprise.activity}` : ""}
                       </p>
                     </li>
                   ))}
@@ -611,7 +612,7 @@ export default function ClientDetail() {
                     >
                       <div>
                         <p className="font-medium">
-                          {process.process_number ?? "â€”"}
+                          {process.process_number ?? "—"}
                         </p>
                         <p className="text-xs text-gray-500">
                           Status: {process.status}
@@ -649,15 +650,15 @@ export default function ClientDetail() {
                   {invoices.map((invoice) => (
                     <div key={invoice.id} className="border rounded p-3">
                       <p className="font-medium">
-                        {invoice.number ?? "Fatura sem nÃºmero"}
+                        {invoice.number ?? "Fatura sem número"}
                       </p>
                       <p className="text-xs text-gray-500">
-                        Status: {invoice.status ?? "Rascunho"} â€¢ Total: {invoice.total
+                        Status: {invoice.status ?? "Rascunho"} • Total: {invoice.total
                           ? new Intl.NumberFormat("pt-BR", {
                               style: "currency",
                               currency: "BRL",
                             }).format(invoice.total)
-                          : "â€”"}
+                          : "—"}
                       </p>
                     </div>
                   ))}
@@ -670,3 +671,6 @@ export default function ClientDetail() {
     </div>
   );
 }
+
+
+

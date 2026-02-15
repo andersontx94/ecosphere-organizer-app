@@ -20,6 +20,7 @@ type EnterpriseRow = {
 };
 
 export default function Enterprises() {
+  const supabaseAny = supabase as any;
   const navigate = useNavigate();
   const { activeOrganization } = useOrganization();
 
@@ -51,7 +52,7 @@ export default function Enterprises() {
       setError(error.message);
       setEnterprises([]);
     } else {
-      setEnterprises((data as EnterpriseRow[]) || []);
+      setEnterprises((data as unknown as EnterpriseRow[]) || []);
     }
 
     setLoading(false);
@@ -154,3 +155,5 @@ export default function Enterprises() {
     </div>
   );
 }
+
+

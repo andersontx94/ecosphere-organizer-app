@@ -87,7 +87,7 @@ export function useCreateDocument() {
       if (!activeOrganization) throw new Error('Organization not selected');
       const { data: document, error } = await supabase
         .from('documents')
-        .insert({ ...data, organization_id: activeOrganization.id })
+        .insert({ ...data, organization_id: activeOrganization.id } as any)
         .select()
         .single();
       
