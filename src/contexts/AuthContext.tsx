@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, supabaseConfigError } from "@/lib/supabase";
 import type { Database } from '@/integrations/supabase/types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'] & {
@@ -88,24 +88,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { name },
-      },
-    });
-    const needsEmailConfirmation = !data.session;
-    return { error, needsEmailConfirmation };
+    if (!isSupabaseConfigured) {
+      return {
+        error: new Error(supabaseConfigError ?? "Supabase nao configurado."),
+        needsEmailConfirmation: false,
+      };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: { name },
+        },
+      });
+      const needsEmailConfirmation = !data.session;
+      return { error, needsEmailConfirmation };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Erro ao criar conta.";
+      return { error: new Error(message), needsEmailConfirmation: false };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    if (!isSupabaseConfigured) {
+      return { error: new Error(supabaseConfigError ?? "Supabase nao configurado.") };
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Erro ao entrar.";
+      return { error: new Error(message) };
+    }
   };
 
   const signOut = async () => {
