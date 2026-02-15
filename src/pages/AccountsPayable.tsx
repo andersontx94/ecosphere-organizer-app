@@ -181,7 +181,7 @@ export default function AccountsPayable() {
 
           <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="w-full gap-2 sm:w-auto">
                 <Plus className="h-4 w-4" />
                 Nova Saída
               </Button>
@@ -206,7 +206,7 @@ export default function AccountsPayable() {
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="amount"
@@ -236,7 +236,7 @@ export default function AccountsPayable() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="category"
@@ -286,7 +286,7 @@ export default function AccountsPayable() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
                       name="client_id"
@@ -354,11 +354,20 @@ export default function AccountsPayable() {
                     )}
                   />
 
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+                  <div className="flex flex-col-reverse gap-2 pt-4 md:flex-row md:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleOpenChange(false)}
+                      className="w-full md:w-auto"
+                    >
                       Cancelar
                     </Button>
-                    <Button type="submit" disabled={createPayable.isPending || updatePayable.isPending}>
+                    <Button
+                      type="submit"
+                      disabled={createPayable.isPending || updatePayable.isPending}
+                      className="w-full md:w-auto"
+                    >
                       {editingItem ? 'Salvar' : 'Criar'}
                     </Button>
                   </div>
@@ -369,7 +378,7 @@ export default function AccountsPayable() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -404,7 +413,7 @@ export default function AccountsPayable() {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>

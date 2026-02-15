@@ -38,12 +38,12 @@ export default function Processes() {
   }, [processes, statusFilter, dueSoonOnly]);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Processos"
         description="Licenças, protocolos e prazos ambientais."
         action={
-          <Button onClick={() => navigate("/processos/novo")}>
+          <Button onClick={() => navigate("/processos/novo")} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Novo processo
           </Button>
@@ -85,7 +85,7 @@ export default function Processes() {
       <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)] overflow-hidden">
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-6 text-muted-foreground">Carregando...</div>
+            <div className="p-4 text-muted-foreground md:p-6">Carregando...</div>
           ) : visibleProcesses.length === 0 ? (
             <div className="p-8 text-center space-y-3">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">

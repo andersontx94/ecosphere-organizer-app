@@ -120,7 +120,7 @@ export function ProcessForm({ open, onOpenChange, onSubmit, initialData, isEditi
           <DialogTitle>{isEditing ? 'Editar Processo' : 'Novo Processo Ambiental'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="process_type">Tipo de Processo *</Label>
               <Select
@@ -166,7 +166,7 @@ export function ProcessForm({ open, onOpenChange, onSubmit, initialData, isEditi
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="client_id">Cliente</Label>
               <Select
@@ -232,7 +232,7 @@ export function ProcessForm({ open, onOpenChange, onSubmit, initialData, isEditi
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="process_number">Número do Processo</Label>
               <Input
@@ -262,7 +262,7 @@ export function ProcessForm({ open, onOpenChange, onSubmit, initialData, isEditi
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="protocol_date">Data Protocolo</Label>
               <Input
@@ -312,11 +312,16 @@ export function ProcessForm({ open, onOpenChange, onSubmit, initialData, isEditi
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-col-reverse gap-3 pt-4 md:flex-row md:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="w-full md:w-auto"
+            >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="w-full md:w-auto">
               {isSubmitting ? 'Salvando...' : isEditing ? 'Salvar' : 'Criar Processo'}
             </Button>
           </div>

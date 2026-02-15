@@ -217,12 +217,12 @@ export default function ProcessTypes() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Tipos de Processo"
         description="Catálogo de processos ambientais por organização."
         action={
-          <Button onClick={openNewDialog}>
+          <Button onClick={openNewDialog} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Novo tipo
           </Button>
@@ -474,10 +474,10 @@ export default function ProcessTypes() {
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setDialogOpen(false)}>
+            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
               Cancelar
             </Button>
-            <Button onClick={handleSave}>
+            <Button onClick={handleSave} className="w-full sm:w-auto">
               {editing ? "Salvar alterações" : "Criar tipo"}
             </Button>
           </DialogFooter>
@@ -486,3 +486,4 @@ export default function ProcessTypes() {
     </div>
   );
 }
+

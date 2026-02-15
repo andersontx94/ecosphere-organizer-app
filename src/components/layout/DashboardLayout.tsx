@@ -1,5 +1,8 @@
-﻿import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import { useState } from "react";
 import Sidebar from "../Sidebar";
+import MobileSidebar from "./MobileSidebar";
+import MobileTopbar from "./MobileTopbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/contexts/OrganizationContext";
 
@@ -7,15 +10,21 @@ export default function DashboardLayout() {
   const { user, signOut } = useAuth();
   const { organizations, activeOrganization, setActiveOrganization, loading } =
     useOrganization();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-transparent">
+    <div className="flex min-h-screen bg-transparent overflow-x-hidden">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar className="hidden md:block" />
+      <MobileSidebar
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
 
       {/* Conteúdo principal */}
-      <main className="flex-1 overflow-auto">
-        <header className="flex flex-col gap-3 border-b border-border/60 bg-card/70 backdrop-blur-xl px-6 py-4 shadow-[var(--shadow-sm)] md:flex-row md:items-center md:justify-between">
+      <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden">
+        <MobileTopbar onMenuClick={() => setMobileMenuOpen(true)} />
+        <header className="flex flex-col gap-3 border-b border-border/60 bg-card/70 backdrop-blur-xl px-4 py-3 shadow-[var(--shadow-sm)] md:flex-row md:items-center md:justify-between md:px-6 md:py-4">
           <div className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
               Organização ativa
@@ -58,4 +67,3 @@ export default function DashboardLayout() {
     </div>
   );
 }
-

@@ -77,10 +77,13 @@ export default function NewService() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-semibold mb-5">Novo Serviço</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-xl border shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 rounded-xl border bg-white p-4 shadow-sm md:p-6"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Nome</label>

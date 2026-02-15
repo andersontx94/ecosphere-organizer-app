@@ -58,12 +58,16 @@ export default function Enterprises() {
   }
 
   if (loading) {
-    return <p className="p-6 text-muted-foreground">Carregando empreendimentos...</p>;
+    return (
+      <p className="p-4 text-muted-foreground md:p-6">
+        Carregando empreendimentos...
+      </p>
+    );
   }
 
   if (error) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <p className="text-destructive font-medium">Erro ao carregar empreendimentos.</p>
         <p className="text-sm text-destructive/80">Detalhe: {error}</p>
       </div>
@@ -71,12 +75,12 @@ export default function Enterprises() {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-4 p-4 md:p-6">
       <PageHeader
         title="Empreendimentos"
         description="Unidades e empresas vinculadas aos clientes."
         action={
-          <Button onClick={() => navigate("/empresas/nova")}>
+          <Button onClick={() => navigate("/empresas/nova")} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Novo empreendimento
           </Button>

@@ -11,8 +11,14 @@ import {
   Tags,
   FileSignature,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export default function Sidebar() {
+type SidebarProps = {
+  className?: string;
+  onNavigate?: () => void;
+};
+
+export default function Sidebar({ className, onNavigate }: SidebarProps) {
   const baseLink =
     "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors";
   const activeLink =
@@ -21,7 +27,12 @@ export default function Sidebar() {
     "text-[hsl(var(--sidebar-foreground))] hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-primary))]";
 
   return (
-    <aside className="w-64 min-h-screen border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] p-6 shadow-[var(--shadow-lg)]">
+    <aside
+      className={cn(
+        "w-64 min-h-screen border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] p-6 shadow-[var(--shadow-lg)]",
+        className
+      )}
+    >
       <div className="mb-8 space-y-1">
         <h1 className="text-xl font-semibold tracking-tight">EcoSphere</h1>
         <p className="text-xs uppercase tracking-[0.2em] text-[hsl(var(--sidebar-primary))]">
@@ -32,6 +43,7 @@ export default function Sidebar() {
       <nav className="flex flex-col gap-1">
         <NavLink
           to="/"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -42,6 +54,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/clientes"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -52,6 +65,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/empresas"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -62,6 +76,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/processos"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -72,6 +87,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/processos/tipos"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -82,6 +98,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/propostas"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -92,6 +109,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/servicos"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -102,6 +120,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/financeiro"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -112,6 +131,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/documentos"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }
@@ -122,6 +142,7 @@ export default function Sidebar() {
 
         <NavLink
           to="/tarefas"
+          onClick={onNavigate}
           className={({ isActive }) =>
             `${baseLink} ${isActive ? activeLink : inactiveLink}`
           }

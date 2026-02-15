@@ -192,7 +192,7 @@ export default function NewProcess() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Novo Processo"
         description="Abra processos ambientais com informações essenciais e prazos."

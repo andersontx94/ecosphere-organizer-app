@@ -13,7 +13,7 @@ export default function Clients() {
   const safeClients: Client[] = clients ?? [];
 
   if (isLoading) {
-    return <p className="p-6 text-muted-foreground">Carregando clientes...</p>;
+    return <p className="p-4 text-muted-foreground md:p-6">Carregando clientes...</p>;
   }
 
   if (error) {
@@ -22,7 +22,7 @@ export default function Clients() {
         ? (error as { message?: string }).message
         : "Erro desconhecido.";
     return (
-      <div className="p-6 space-y-2">
+      <div className="space-y-2 p-4 md:p-6">
         <p className="text-destructive font-medium">Erro ao carregar clientes.</p>
         <p className="text-sm text-destructive/80">Detalhe: {message}</p>
       </div>
@@ -30,7 +30,7 @@ export default function Clients() {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-4 p-4 md:p-6">
       <PageHeader
         title="Clientes"
         description="Contratantes cadastrados na consultoria."

@@ -365,27 +365,32 @@ export default function ProposalForm() {
   }
 
   if (loading) {
-    return <p className="p-6 text-muted-foreground">Carregando proposta...</p>;
+    return <p className="p-4 text-muted-foreground md:p-6">Carregando proposta...</p>;
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title={proposal.id ? "Editar Proposta" : "Nova Proposta"}
         description="Estruture serviços e valores para converter em cliente."
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center">
             {proposal.status !== "won" && (
               <Button
                 variant="outline"
                 onClick={() => handleSave("sent")}
                 disabled={saving}
+                className="w-full md:w-auto"
               >
                 Marcar como enviada
               </Button>
             )}
             {proposal.status !== "won" && (
-              <Button onClick={() => setConvertOpen(true)} disabled={saving}>
+              <Button
+                onClick={() => setConvertOpen(true)}
+                disabled={saving}
+                className="w-full md:w-auto"
+              >
                 Marcar como ganha
               </Button>
             )}
@@ -521,9 +526,9 @@ export default function ProposalForm() {
       </Card>
 
       <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)]">
-        <CardHeader className="flex-row items-center justify-between">
+        <CardHeader className="flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">Itens da proposta</CardTitle>
-          <Button variant="outline" onClick={addItem}>
+          <Button variant="outline" onClick={addItem} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" />
             Adicionar item
           </Button>
@@ -645,11 +650,15 @@ export default function ProposalForm() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <Button onClick={() => handleSave()} disabled={saving}>
+      <div className="flex flex-col gap-2 md:flex-row">
+        <Button onClick={() => handleSave()} disabled={saving} className="w-full md:w-auto">
           {saving ? "Salvando..." : "Salvar proposta"}
         </Button>
-        <Button variant="outline" onClick={() => navigate("/propostas")}>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/propostas")}
+          className="w-full md:w-auto"
+        >
           Voltar
         </Button>
       </div>
@@ -706,10 +715,14 @@ export default function ProposalForm() {
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setConvertOpen(false)}>
+            <Button
+              variant="ghost"
+              onClick={() => setConvertOpen(false)}
+              className="w-full sm:w-auto"
+            >
               Cancelar
             </Button>
-            <Button onClick={handleConvert} disabled={saving}>
+            <Button onClick={handleConvert} disabled={saving} className="w-full sm:w-auto">
               {saving ? "Convertendo..." : "Concluir proposta"}
             </Button>
           </DialogFooter>

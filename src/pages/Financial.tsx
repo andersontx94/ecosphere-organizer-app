@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ function parseNumber(value: string) {
 }
 
 function formatDate(value: string | null) {
-  if (!value) return "â€”";
+  if (!value) return "—";
   return new Date(value).toLocaleDateString("pt-BR");
 }
 
@@ -238,7 +238,7 @@ export default function Financial() {
 
   async function importProcessServices() {
     if (!activeOrganization || !processId) {
-      setError("Selecione um processo para importar os serviÃ§os.");
+      setError("Selecione um processo para importar os serviços.");
       return;
     }
 
@@ -255,7 +255,7 @@ export default function Financial() {
     }
 
     const mapped = (data || []).map((row) => ({
-      description: row.services?.name ?? "ServiÃ§o",
+      description: row.services?.name ?? "Serviço",
       qty: String(row.qty ?? 1),
       unit_price: String(row.unit_price ?? 0),
     }));
@@ -282,7 +282,7 @@ export default function Financial() {
       .filter((item) => item.description && item.qty > 0);
 
     if (sanitizedItems.length === 0) {
-      setError("Adicione pelo menos um item com descriÃ§Ã£o e quantidade vÃ¡lida.");
+      setError("Adicione pelo menos um item com descrição e quantidade válida.");
       return;
     }
 
@@ -396,7 +396,7 @@ export default function Financial() {
     const amount = parseNumber(form.amount);
 
     if (amount <= 0) {
-      setError("Informe um valor vÃ¡lido para o pagamento.");
+      setError("Informe um valor válido para o pagamento.");
       return;
     }
 
@@ -470,19 +470,19 @@ export default function Financial() {
 
   if (orgLoading) {
     return (
-      <div className="p-6">
-        <p className="text-sm text-muted-foreground">Carregando organizaÃ§Ã£o...</p>
+      <div className="p-4 md:p-6">
+        <p className="text-sm text-muted-foreground">Carregando organização...</p>
       </div>
     );
   }
 
   if (!activeOrganization) {
     return (
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         <div className="border border-border/60 bg-card/80 rounded-lg p-6 text-center space-y-2 shadow-[var(--shadow-card)]">
           <h1 className="text-xl font-semibold">Financeiro</h1>
           <p className="text-sm text-muted-foreground">
-            Selecione ou crie uma organizaÃ§Ã£o para continuar.
+            Selecione ou crie uma organização para continuar.
           </p>
           <Link
             to="/"
@@ -496,10 +496,10 @@ export default function Financial() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6 p-4 md:p-6">
       <PageHeader
         title="Financeiro"
-        description="Controle de faturas, cobranÃ§as e pagamentos."
+        description="Controle de faturas, cobranças e pagamentos."
       />
 
       <Card className="border-border/60 bg-card/80 shadow-[var(--shadow-card)]">
@@ -558,24 +558,24 @@ export default function Financial() {
               <option value="">Processo (opcional)</option>
               {filteredProcesses.map((proc) => (
                 <option key={proc.id} value={proc.id}>
-                  {proc.process_number ?? "Sem nÃºmero"} â€” {proc.process_type ?? "Sem tipo"}
+                  {proc.process_number ?? "Sem número"} — {proc.process_type ?? "Sem tipo"}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-muted-foreground mb-1">NÃºmero</label>
+            <label className="block text-sm text-muted-foreground mb-1">Número</label>
             <Input
               className="bg-background"
-              placeholder="NÃºmero da fatura"
+              placeholder="Número da fatura"
               value={number}
               onChange={(e) => setNumber(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-muted-foreground mb-1">EmissÃ£o</label>
+            <label className="block text-sm text-muted-foreground mb-1">Emissão</label>
             <Input
               className="bg-background"
               type="date"
@@ -596,11 +596,11 @@ export default function Financial() {
         </div>
 
         <div>
-          <label className="block text-sm text-muted-foreground mb-1">ObservaÃ§Ãµes</label>
+          <label className="block text-sm text-muted-foreground mb-1">Observações</label>
           <textarea
             className="border border-input bg-background rounded px-3 py-2 w-full"
             rows={2}
-            placeholder="ObservaÃ§Ãµes (opcional)"
+            placeholder="Observações (opcional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
@@ -625,7 +625,7 @@ export default function Financial() {
                 variant="outline"
                 size="sm"
               >
-                Importar serviÃ§os do processo
+                Importar serviços do processo
               </Button>
             </div>
           </div>
@@ -635,7 +635,7 @@ export default function Financial() {
               <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
                 <Input
                   className="bg-background"
-                  placeholder="DescriÃ§Ã£o"
+                  placeholder="Descrição"
                   value={item.description}
                   onChange={(e) => updateItem(index, "description", e.target.value)}
                 />
@@ -647,7 +647,7 @@ export default function Financial() {
                 />
                 <Input
                   className="bg-background"
-                  placeholder="PreÃ§o unitÃ¡rio"
+                  placeholder="Preço unitário"
                   value={item.unit_price}
                   onChange={(e) => updateItem(index, "unit_price", e.target.value)}
                 />
@@ -705,17 +705,17 @@ export default function Financial() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-foreground">
-                        {invoice.number ?? "Fatura sem nÃºmero"}
+                        {invoice.number ?? "Fatura sem número"}
                       </p>
                       <Badge variant={statusVariant(invoice.status)}>
                         {invoice.status ?? "Rascunho"}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Cliente: {invoice.clients?.name ?? "â€”"} â€¢ Processo: {invoice.environmental_processes?.process_number ?? "â€”"}
+                      Cliente: {invoice.clients?.name ?? "—"} • Processo: {invoice.environmental_processes?.process_number ?? "—"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      EmissÃ£o: {formatDate(invoice.issue_date)} â€¢ Vencimento: {formatDate(invoice.due_date)}
+                      Emissão: {formatDate(invoice.issue_date)} • Vencimento: {formatDate(invoice.due_date)}
                     </p>
                   </div>
                   <div className="text-right">
@@ -742,7 +742,7 @@ export default function Financial() {
                             <div key={item.id} className="flex items-center justify-between text-sm">
                               <span>{item.description}</span>
                               <span>
-                                {item.qty} Ã— {formatCurrency(item.unit_price)} = {formatCurrency(item.total)}
+                                {item.qty} × {formatCurrency(item.unit_price)} = {formatCurrency(item.total)}
                               </span>
                             </div>
                           ))}
@@ -759,7 +759,7 @@ export default function Financial() {
                           {paymentsMap[invoice.id]?.map((payment) => (
                             <div key={payment.id} className="flex items-center justify-between text-sm">
                               <span>
-                                {formatDate(payment.paid_at)} â€¢ {payment.method ?? "MÃ©todo nÃ£o informado"}
+                                {formatDate(payment.paid_at)} • {payment.method ?? "Método não informado"}
                               </span>
                               <span>{formatCurrency(payment.amount)}</span>
                             </div>
@@ -782,13 +782,13 @@ export default function Financial() {
                         />
                         <Input
                           className="bg-background"
-                          placeholder="MÃ©todo (PIX, Boleto...)"
+                          placeholder="Método (PIX, Boleto...)"
                           value={paymentForms[invoice.id]?.method ?? ""}
                           onChange={(e) => updatePaymentForm(invoice.id, "method", e.target.value)}
                         />
                         <Input
                           className="bg-background"
-                          placeholder="ObservaÃ§Ãµes"
+                          placeholder="Observações"
                           value={paymentForms[invoice.id]?.notes ?? ""}
                           onChange={(e) => updatePaymentForm(invoice.id, "notes", e.target.value)}
                         />
@@ -813,4 +813,5 @@ export default function Financial() {
     </div>
   );
 }
+
 
