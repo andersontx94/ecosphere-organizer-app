@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured, supabaseConfigError } from "@/lib/supabase";
+import { getAuthRedirectMeta } from "@/lib/authRedirect";
 import type { Database } from '@/integrations/supabase/types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'] & {
@@ -96,14 +97,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
+      const { origin, redirectTo } = getAuthRedirectMeta();
+      console.info("[auth] signUp origin", origin);
+      console.info("[auth] signUp redirectTo", redirectTo);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectTo,
           data: { name },
         },
       });
+      if (error) {
+        console.error("[auth] signUp error", error);
+      }
       const needsEmailConfirmation = !data.session;
       return { error, needsEmailConfirmation };
     } catch (err) {

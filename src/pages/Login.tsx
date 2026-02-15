@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase, isSupabaseConfigured, supabaseConfigError } from "@/lib/supabase";
+import { getAuthRedirectMeta } from "@/lib/authRedirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +45,7 @@ export default function Login() {
     setLoading(false);
 
     if (error) {
+      console.error("[auth] signIn error", error);
       const message = error.message ?? "Erro ao entrar.";
       if (message.toLowerCase().includes("confirm")) {
         setNeedsConfirmation(true);
@@ -74,18 +76,23 @@ export default function Login() {
     setResendLoading(true);
     setResendMessage(null);
 
+    const { origin, redirectTo } = getAuthRedirectMeta();
+    console.info("[auth] resendConfirmation origin", origin);
+    console.info("[auth] resendConfirmation redirectTo", redirectTo);
+
     const { error } = await supabase.auth.resend({
       type: "signup",
       email: trimmedEmail,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: redirectTo,
       },
     });
 
     setResendLoading(false);
 
     if (error) {
-      setResendMessage("NÃ£o foi possÃ­vel reenviar agora. Tente novamente.");
+      console.error("[auth] resendConfirmation error", error);
+      setResendMessage("Não foi possível reenviar agora. Tente novamente.");
       return;
     }
 
@@ -259,4 +266,10 @@ export default function Login() {
     </div>
   );
 }
+
+
+
+
+
+
 

@@ -29,12 +29,14 @@ export default function AuthCallback() {
     }
 
     async function handleCallback() {
+      console.info("[auth] callback origin", window.location.origin);
       const searchParams = new URLSearchParams(window.location.search);
       const hashParams = new URLSearchParams(window.location.hash.replace("#", ""));
       const errorDescription =
         searchParams.get("error_description") || searchParams.get("error");
 
       if (errorDescription) {
+        console.error("[auth] callback error", errorDescription);
         setStatus("error");
         setMessage(errorDescription);
         return;
@@ -44,6 +46,7 @@ export default function AuthCallback() {
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
+          console.error("[auth] exchangeCodeForSession error", error);
           setStatus("error");
           setMessage(error.message ?? "Falha ao finalizar confirmacao.");
           return;
@@ -62,6 +65,7 @@ export default function AuthCallback() {
           refresh_token: refreshToken,
         });
         if (error) {
+          console.error("[auth] setSession error", error);
           setStatus("error");
           setMessage(error.message ?? "Falha ao iniciar sessao.");
           return;

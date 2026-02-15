@@ -26,6 +26,8 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const [confirmationEmail, setConfirmationEmail] = useState("");
+  const showEmailConfigHint =
+    error?.toLowerCase().includes("error sending confirmation email") ?? false;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,6 +43,7 @@ export default function Signup() {
     setLoading(false);
 
     if (error) {
+      console.error("[auth] signUp error", error);
       setError(error.message);
       return;
     }
@@ -217,6 +220,12 @@ export default function Signup() {
               </div>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
+              {showEmailConfigHint && (
+                <p className="text-sm text-amber-700">
+                  Possivel falha de SMTP ou URL de redirecionamento. Verifique a
+                  configuracao de e-mail e URLs no Supabase.
+                </p>
+              )}
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
               <Button type="submit" className="w-full" disabled={loading}>
