@@ -71,3 +71,10 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Checklist - Process Types & Proposals
+
+- Apply Supabase migrations in `supabase/migrations`.
+- Test Tipos de Processo: listar e criar um tipo.
+- Testar Proposta: criar proposta com 1 item com serviÃ§o e 1 item sem serviÃ§o.
+- Confirmar total calculado automaticamente na proposta.

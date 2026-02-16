@@ -73,6 +73,7 @@ export default function ProposalForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [services, setServices] = useState<ServiceOption[]>([]);
+  const [servicesError, setServicesError] = useState<string | null>(null);
 
   const [proposal, setProposal] = useState<ProposalRow>({
     id: "",
@@ -120,9 +121,13 @@ export default function ProposalForm() {
         .eq("organization_id", activeOrganization.id)
         .eq("active", true)
         .order("name");
-      if (!error) {
-        setServices((data as ServiceOption[]) ?? []);
+      if (error) {
+        console.error("Erro ao carregar serviÃ§os:", error);
+        setServicesError(error.message);
+        setServices([]);
+        return;
       }
+      setServices((data as ServiceOption[]) ?? []);
     }
 
     loadServices();
@@ -319,8 +324,17 @@ export default function ProposalForm() {
       console.error("Erro ao salvar proposta:", err);
       const message =
         err instanceof Error ? err.message : "Erro ao salvar proposta.";
+      const details =
+        typeof err === "object" && err && "details" in err
+          ? (err as { details?: string }).details
+          : undefined;
+      const hint =
+        typeof err === "object" && err && "hint" in err
+          ? (err as { hint?: string }).hint
+          : undefined;
+      const fullMessage = [message, details, hint].filter(Boolean).join(" - ");
       setError(message);
-      toast.error(message);
+      toast.error(fullMessage || message);
     } finally {
       setSaving(false);
     }
@@ -534,6 +548,20 @@ export default function ProposalForm() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
+          {services.length === 0 && (
+            <div className="rounded-lg border border-border/60 bg-muted/40 p-3 text-sm text-muted-foreground">
+              Nenhum serviÃ§o cadastrado. Cadastre em{" "}
+              <Link to="/servicos/novo" className="text-primary underline">
+                ServiÃ§os
+              </Link>
+              .
+              {servicesError && (
+                <p className="mt-2 text-xs text-destructive">
+                  {servicesError}
+                </p>
+              )}
+            </div>
+          )}
           {items.map((item, index) => {
             const total =
               (Number(item.quantity) || 0) * (Number(item.unit_price) || 0);

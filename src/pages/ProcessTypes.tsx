@@ -51,6 +51,10 @@ export default function ProcessTypes() {
   const [processTypes, setProcessTypes] = useState<ProcessTypeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const showMigrationHint =
+    error?.toLowerCase().includes("process_types") ||
+    error?.toLowerCase().includes("schema cache") ||
+    false;
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -92,6 +96,7 @@ export default function ProcessTypes() {
       .order("name", { ascending: true });
 
     if (error) {
+      console.error("Erro ao carregar tipos de processo:", error);
       setError(error.message);
       setProcessTypes([]);
     } else {
@@ -367,6 +372,11 @@ export default function ProcessTypes() {
       {error && (
         <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
+          {showMigrationHint && (
+            <p className="mt-2 text-xs text-destructive/90">
+              Aplique as migrations no Supabase e recarregue a pÃ¡gina.
+            </p>
+          )}
         </div>
       )}
 
