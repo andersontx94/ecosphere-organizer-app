@@ -82,7 +82,7 @@ export function useCreateEnterprise() {
       if (!activeOrganization) throw new Error("Organization not selected");
       const { data: enterprise, error } = await supabase
         .from("enterprises")
-        .insert({ ...data, organization_id: activeOrganization.id })
+        .insert({ ...data, organization_id: activeOrganization.id } as any)
         .select()
         .single();
 

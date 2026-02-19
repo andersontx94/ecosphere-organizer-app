@@ -113,7 +113,7 @@ export function useCreateProcessRevenue() {
       if (!activeOrganization) throw new Error('Organization not selected');
       const { data: revenue, error } = await supabase
         .from('process_revenues')
-        .insert({ ...data, organization_id: activeOrganization.id })
+        .insert({ ...data, organization_id: activeOrganization.id } as any)
         .select()
         .single();
       
@@ -174,7 +174,7 @@ export function useCreateProcessCost() {
       if (!activeOrganization) throw new Error('Organization not selected');
       const { data: cost, error } = await supabase
         .from('process_costs')
-        .insert({ ...data, organization_id: activeOrganization.id })
+        .insert({ ...data, organization_id: activeOrganization.id } as any)
         .select()
         .single();
       

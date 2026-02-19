@@ -79,7 +79,7 @@ export function useCreateProject() {
     mutationFn: async (data: Omit<ProjectInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('projects')
-        .insert({ ...data, organization_id: activeOrganization!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id } as any)
         .select()
         .single();
 

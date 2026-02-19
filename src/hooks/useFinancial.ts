@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from "@/lib/supabase";
 import { useOrganization } from '@/contexts/OrganizationContext';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type AccountReceivable = Database['public']['Tables']['accounts_receivable']['Row'];
@@ -73,7 +74,7 @@ export function useCreateAccountReceivable() {
     mutationFn: async (data: Omit<AccountReceivableInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('accounts_receivable')
-        .insert({ ...data, organization_id: activeOrganization!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id } as any)
         .select()
         .single();
 
@@ -176,7 +177,7 @@ export function useCreateAccountPayable() {
     mutationFn: async (data: Omit<AccountPayableInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('accounts_payable')
-        .insert({ ...data, organization_id: activeOrganization!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id } as any)
         .select()
         .single();
 
@@ -259,7 +260,7 @@ export function useCreateFinancialAccount() {
     mutationFn: async (data: Omit<FinancialAccountInsert, 'user_id' | 'organization_id'>) => {
       const { data: result, error } = await supabase
         .from('financial_accounts')
-        .insert({ ...data, organization_id: activeOrganization!.id })
+        .insert({ ...data, organization_id: activeOrganization!.id } as any)
         .select()
         .single();
 
@@ -285,6 +286,7 @@ export interface FinancialSummary {
 
 export function useFinancialSummary(startDate?: string, endDate?: string) {
   const { activeOrganization } = useOrganization();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: ['financial-summary', user?.id, startDate, endDate],

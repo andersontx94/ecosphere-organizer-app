@@ -6,7 +6,11 @@ import MobileTopbar from "./MobileTopbar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOrganization } from "@/contexts/OrganizationContext";
 
-export default function DashboardLayout() {
+type DashboardLayoutProps = {
+  children?: React.ReactNode;
+};
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut } = useAuth();
   const { organizations, activeOrganization, setActiveOrganization, loading } =
     useOrganization();
@@ -62,7 +66,7 @@ export default function DashboardLayout() {
             </button>
           </div>
         </header>
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
     </div>
   );

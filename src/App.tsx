@@ -37,6 +37,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import OnboardingOrganization from "./pages/OnboardingOrganization";
 import SelectOrganization from "./pages/SelectOrganization";
+import AuthCallback from "./pages/AuthCallback";
 
 import NotFound from "./pages/NotFound";
 
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="esqueci-senha" element={<ForgotPassword />} />
         </Route>
         <Route path="redefinir-senha" element={<ResetPassword />} />
+        <Route path="auth/callback" element={<AuthCallback />} />
 
         {/* Tudo que usa Sidebar/Layout */}
         <Route element={<RequireAuth />}>

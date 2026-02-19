@@ -24,7 +24,7 @@ export function useClients() {
     queryKey: ["clients", activeOrganization?.id],
     queryFn: async () => {
       if (!activeOrganization) return [];
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("clients")
         .select(
           "id, name, type, trade_name, cpf_cnpj, phone, city, state, address, notes, active, created_at"

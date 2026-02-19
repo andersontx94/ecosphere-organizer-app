@@ -77,16 +77,20 @@ export default function ProcessTasks({ processId }: Props) {
       ? new Date(dueDate).toISOString().split("T")[0]
       : null;
 
-    const { error } = await supabase.from("tasks").insert([
-      {
-        organization_id: activeOrganization.id,
-        process_id: processId,
-        title: title.trim(),
-        description: description.trim() ? description.trim() : null,
-        due_date: formattedDate,
-        status: "Aberta",
-      },
-    ]);
+    const { error } = await supabase
+      .from("tasks")
+      .insert(
+        [
+          {
+            organization_id: activeOrganization.id,
+            process_id: processId,
+            title: title.trim(),
+            description: description.trim() ? description.trim() : null,
+            due_date: formattedDate,
+            status: "Aberta",
+          },
+        ] as any
+      );
 
     if (error) {
       console.error(error);
@@ -109,7 +113,7 @@ export default function ProcessTasks({ processId }: Props) {
 
     const { error } = await supabase
       .from("tasks")
-      .update({ status })
+      .update({ status: status as any })
       .eq("id", task.id)
       .eq("organization_id", activeOrganization.id);
 

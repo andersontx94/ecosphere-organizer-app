@@ -72,7 +72,7 @@ export default function Documents() {
       setLoading(true);
       setError(null);
 
-      let query = supabase
+      let query = (supabase as any)
         .from("documents")
         .select(
           "id, title, file_path, file_type, created_at, process_id, environmental_processes(process_number, process_type)"
@@ -151,15 +151,17 @@ export default function Documents() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("documents").insert([
-      {
-        organization_id: activeOrganization.id,
-        process_id: processId,
-        title: title.trim(),
-        file_path: path,
-        file_type: file.type || null,
-      },
-    ]);
+    const { error: insertError } = await supabase.from("documents").insert(
+      [
+        {
+          organization_id: activeOrganization.id,
+          process_id: processId,
+          title: title.trim(),
+          file_path: path,
+          file_type: file.type || null,
+        },
+      ] as any
+    );
 
     if (insertError) {
       console.error("Failed to insert document:", insertError);
@@ -173,7 +175,7 @@ export default function Documents() {
     setFile(null);
     setUploading(false);
 
-    const { data, error: reloadError } = await supabase
+    const { data, error: reloadError } = await (supabase as any)
       .from("documents")
       .select(
         "id, title, file_path, file_type, created_at, process_id, environmental_processes(process_number, process_type)"

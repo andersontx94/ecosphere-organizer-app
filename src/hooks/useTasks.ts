@@ -84,7 +84,7 @@ export function useCreateTask() {
       if (!activeOrganization) throw new Error('Organization not selected');
       const { data: task, error } = await supabase
         .from('tasks')
-        .insert({ ...data, organization_id: activeOrganization.id })
+        .insert({ ...data, organization_id: activeOrganization.id } as any)
         .select()
         .single();
       
@@ -104,7 +104,7 @@ export function useUpdateTask() {
     mutationFn: async ({ id, data }: { id: string; data: TaskUpdate }) => {
       const { data: task, error } = await supabase
         .from('tasks')
-        .update(data)
+        .update(data as any)
         .eq('id', id)
         .select()
         .single();

@@ -150,7 +150,7 @@ export function useCreateEnvironmentalProcess() {
       }
       const { data: result, error } = await supabase
         .from("environmental_processes")
-        .insert({ ...data, organization_id: activeOrganization.id })
+        .insert({ ...data, organization_id: activeOrganization.id } as any)
         .select()
         .single();
 

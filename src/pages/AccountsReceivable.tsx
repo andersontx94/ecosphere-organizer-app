@@ -5,7 +5,7 @@ import { useOrganization } from "@/contexts/OrganizationContext"
 type AccountReceivable = {
   id: string
   description: string
-  status: string
+  status: string | null
   due_date: string | null
 }
 

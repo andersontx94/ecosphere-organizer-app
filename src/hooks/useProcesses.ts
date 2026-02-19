@@ -51,7 +51,7 @@ export function useProcesses() {
       .order("created_at", { ascending: false });
 
     if (!error && data) {
-      const mapped = data.map((item) => ({
+      const mapped = (data as any[]).map((item) => ({
         id: item.id,
         process_number: item.process_number,
         process_type: item.process_type ?? null,
@@ -90,20 +90,21 @@ export function useProcesses() {
       .single();
 
     if (error) return null;
+    const raw = data as any;
     return {
-      id: data.id,
-      process_number: data.process_number,
-      process_type: data.process_type ?? null,
-      agency: data.agency ?? null,
-      status: data.status,
-      due_date: data.due_date ?? null,
-      created_at: data.created_at,
-      client_id: data.client_id ?? null,
-      enterprise_id: data.enterprise_id ?? null,
-      service_id: data.service_id ?? null,
-      clients: data.clients ?? null,
-      enterprises: data.enterprises ?? null,
-      services: data.services ?? null,
+      id: raw.id,
+      process_number: raw.process_number,
+      process_type: raw.process_type ?? null,
+      agency: raw.agency ?? null,
+      status: raw.status,
+      due_date: raw.due_date ?? null,
+      created_at: raw.created_at,
+      client_id: raw.client_id ?? null,
+      enterprise_id: raw.enterprise_id ?? null,
+      service_id: raw.service_id ?? null,
+      clients: raw.clients ?? null,
+      enterprises: raw.enterprises ?? null,
+      services: raw.services ?? null,
     };
   }
 
